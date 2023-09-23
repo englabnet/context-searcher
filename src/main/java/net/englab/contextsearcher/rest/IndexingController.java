@@ -1,6 +1,7 @@
 package net.englab.contextsearcher.rest;
 
 import lombok.RequiredArgsConstructor;
+import net.englab.contextsearcher.model.EnglishVariety;
 import net.englab.contextsearcher.service.VideoIndexer;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,15 +15,16 @@ public class IndexingController {
     private final VideoIndexer videoIndexer;
 
     /**
-     * Index the given video links.
+     * Indexes the given video and its subtitles.
      *
-     * @param videoId video id
-     * @param srt video subtitles
-     * @return the current status
+     * @param videoId   the video id
+     * @param variety   the variety of English used in the video
+     * @param srt       the subtitles for the video in SRT format.
+     * @return the status after attempting to index.
      */
     @PostMapping("/index")
-    public String index(@RequestParam String videoId, @RequestBody String srt) {
-        videoIndexer.indexVideo(videoId, srt);
+    public String index(@RequestParam String videoId, @RequestParam EnglishVariety variety, @RequestBody String srt) {
+        videoIndexer.indexVideo(videoId, variety, srt);
         return "index";
     }
 
@@ -38,7 +40,7 @@ public class IndexingController {
     }
 
     /**
-     * Get the video links that were indexed.
+     * Returns the list of indexed video links.
      *
      * @return a list of links
      */

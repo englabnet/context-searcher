@@ -14,6 +14,7 @@ import java.util.Map;
 public class VideoDocument {
     @JsonProperty("video_id")
     private String videoId;
+    private String variety;
     private String sentence;
     @JsonProperty("time_ranges")
     private Map<String, TimeFrame> timeRanges;

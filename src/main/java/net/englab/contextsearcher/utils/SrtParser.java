@@ -12,6 +12,7 @@ import net.englab.contextsearcher.model.TimeFrame;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -20,6 +21,8 @@ import java.util.regex.Pattern;
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SrtParser {
+
+    private final static Pattern sentencePattern = Pattern.compile("[^.!?]+([.!?]|$)");
 
     public static List<SrtSentence> parseSentences(String srt) {
         try (BufferedReader srtReader = new BufferedReader(new StringReader(srt))) {
@@ -85,9 +88,7 @@ public class SrtParser {
         List<String> sentences = new ArrayList<>();
 
         // The regular expression below will split sentences while keeping their ending punctuation.
-        String regex = "[^.!?]+([.!?]|$)";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(text);
+        Matcher matcher = sentencePattern.matcher(text);
 
         while (matcher.find()) {
             sentences.add(matcher.group().trim());
@@ -104,6 +105,19 @@ public class SrtParser {
 
     private static TimeFrame parseTimeFrame(String line) {
         String[] timeInfo = line.split("-->");
-        return new TimeFrame(timeInfo[0].strip(), timeInfo[1].strip());
+        long startTime = (long) Math.floor(convertToSeconds(timeInfo[0].strip()));
+        long endTime = (long) Math.ceil(convertToSeconds(timeInfo[1].strip()));
+        return new TimeFrame(startTime, endTime);
+    }
+
+    private static double convertToSeconds(String timeString) {
+        String formattedTimeString = "PT"
+                + timeString.replaceFirst(":", "H")
+                .replaceFirst(":", "M")
+                .replace(",", ".")
+                + "S";
+
+        Duration duration = Duration.parse(formattedTimeString);
+        return duration.getSeconds() + duration.getNano() / 1_000_000_000.0;
     }
 }

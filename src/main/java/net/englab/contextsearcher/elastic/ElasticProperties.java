@@ -1,5 +1,6 @@
 package net.englab.contextsearcher.elastic;
 
+import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import co.elastic.clients.elasticsearch._types.mapping.TextProperty;
 import lombok.AccessLevel;
@@ -9,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class ElasticProperties {
     public static final Property NON_SEARCHABLE_TEXT_PROPERTY = TextProperty.of(b -> b.index(false))._toProperty();
     public static final Property TEXT_PROPERTY = TextProperty.of(b -> b)._toProperty();
+    public static final Property KEYWORD_PROPERTY = KeywordProperty.of(b -> b)._toProperty();
 }

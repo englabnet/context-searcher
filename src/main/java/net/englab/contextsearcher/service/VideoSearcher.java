@@ -6,6 +6,7 @@ import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 import lombok.RequiredArgsConstructor;
 import net.englab.contextsearcher.elastic.VideoDocument;
+import net.englab.contextsearcher.model.EnglishVariety;
 import net.englab.contextsearcher.model.TimeFrame;
 import net.englab.contextsearcher.model.VideoSearchResult;
 import org.springframework.stereotype.Service;
@@ -20,8 +21,8 @@ public class VideoSearcher {
 
     private final ElasticService elasticService;
 
-    public List<VideoSearchResult> search(String phrase) {
-        var searchResponse = elasticService.searchVideoByPhrase("videos", "sentence", phrase);
+    public List<VideoSearchResult> search(String phrase, EnglishVariety variety) {
+        var searchResponse = elasticService.searchVideoByPhrase("videos", phrase, variety);
 
         return searchResponse.hits().hits().stream()
                 .map(this::buildSearchResponse)
@@ -30,7 +31,6 @@ public class VideoSearcher {
 
     private VideoSearchResult buildSearchResponse(Hit<VideoDocument> hit) {
         VideoDocument doc = hit.source();
-        String url = "https://www.youtube.com/watch?v=" + doc.getVideoId();
 
         String highlight = hit.highlight().get("sentence").get(0);
         String[] parts = highlight.split("<em>|</em>");
@@ -39,8 +39,10 @@ public class VideoSearcher {
         int endIndex = doc.getSentence().length() - parts[parts.length - 1].length() - 1;
 
         RangeMap<Integer, TimeFrame> ranges = mapToRanges(doc.getTimeRanges());
-        TimeFrame timeFrame = new TimeFrame(ranges.get(startIndex).startTime(), ranges.get(endIndex).endTime());
-        return new VideoSearchResult(url, timeFrame, doc.getSentence());
+        long startTimeInSec = ranges.get(startIndex).startTime();
+        long endTimeInSec = ranges.get(endIndex).endTime();
+        TimeFrame timeFrame = new TimeFrame(startTimeInSec, endTimeInSec);
+        return new VideoSearchResult(doc.getVideoId(), timeFrame, doc.getSentence());
     }
 
     private RangeMap<Integer, TimeFrame> mapToRanges(Map<String, TimeFrame> map) {

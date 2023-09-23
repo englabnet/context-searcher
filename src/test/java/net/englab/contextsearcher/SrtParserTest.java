@@ -43,14 +43,14 @@ class SrtParserTest {
                 "probably since it's fairly straightforward to point at an object, say the word for it, and have the other " +
                 "person understand that’s what you’re talking about.";
         assertEquals(expectedText, sentence.text());
-        assertEquals(new TimeFrame("00:00:00,000", "00:00:03,000"), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame("00:00:00,000", "00:00:03,000"), sentence.timeRanges().get(58));
-        assertEquals(new TimeFrame("00:00:03,000", "00:00:06,600"), sentence.timeRanges().get(59));
-        assertEquals(new TimeFrame("00:00:03,000", "00:00:06,600"), sentence.timeRanges().get(130));
-        assertEquals(new TimeFrame("00:00:06,600", "00:00:08,880"), sentence.timeRanges().get(131));
-        assertEquals(new TimeFrame("00:00:06,600", "00:00:08,880"), sentence.timeRanges().get(174));
-        assertEquals(new TimeFrame("00:00:08,880", "00:00:11,760"), sentence.timeRanges().get(175));
-        assertEquals(new TimeFrame("00:00:08,880", "00:00:11,760"), sentence.timeRanges().get(246));
+        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(0));
+        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(58));
+        assertEquals(new TimeFrame(3, 7), sentence.timeRanges().get(59));
+        assertEquals(new TimeFrame(3, 7), sentence.timeRanges().get(130));
+        assertEquals(new TimeFrame(6, 9), sentence.timeRanges().get(131));
+        assertEquals(new TimeFrame(6, 9), sentence.timeRanges().get(174));
+        assertEquals(new TimeFrame(8, 12), sentence.timeRanges().get(175));
+        assertEquals(new TimeFrame(8, 12), sentence.timeRanges().get(246));
     }
 
     @Test
@@ -71,22 +71,22 @@ class SrtParserTest {
         assertEquals(4, sentences.size());
         SrtSentence sentence = sentences.get(0);
         assertEquals("Hello world!", sentence.text());
-        assertEquals(new TimeFrame("00:00:00,000", "00:00:03,000"), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame("00:00:00,000", "00:00:03,000"), sentence.timeRanges().get(12));
+        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(0));
+        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(12));
         sentence = sentences.get(1);
         assertEquals("How are you?", sentence.text());
-        assertEquals(new TimeFrame("00:00:00,000", "00:00:03,000"), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame("00:00:00,000", "00:00:03,000"), sentence.timeRanges().get(11));
+        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(0));
+        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(11));
         sentence = sentences.get(2);
         assertEquals("I'm fine.", sentence.text());
-        assertEquals(new TimeFrame("00:00:00,000", "00:00:03,000"), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame("00:00:00,000", "00:00:03,000"), sentence.timeRanges().get(8));
+        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(0));
+        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(8));
         sentence = sentences.get(3);
         assertEquals("This is a test that will catch bugs!", sentence.text());
-        assertEquals(new TimeFrame("00:00:00,000", "00:00:03,000"), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame("00:00:00,000", "00:00:03,000"), sentence.timeRanges().get(13));
-        assertEquals(new TimeFrame("00:00:03,000", "00:00:06,600"), sentence.timeRanges().get(14));
-        assertEquals(new TimeFrame("00:00:03,000", "00:00:06,600"), sentence.timeRanges().get(36));
+        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(0));
+        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(13));
+        assertEquals(new TimeFrame(3, 7), sentence.timeRanges().get(14));
+        assertEquals(new TimeFrame(3, 7), sentence.timeRanges().get(36));
     }
 
     @Test
@@ -115,21 +115,21 @@ class SrtParserTest {
         String expectedText = "The Arabic word /sˤaħ raːʔ/ for \"deserts\" became " +
                 "the English word specifically for the Sahara Desert.";
         assertEquals(expectedText, sentence.text());
-        assertEquals(new TimeFrame("00:01:06,960", "00:01:10,860"), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame("00:01:06,960", "00:01:10,860"), sentence.timeRanges().get(64));
-        assertEquals(new TimeFrame("00:01:10,860", "00:01:14,460"), sentence.timeRanges().get(65));
-        assertEquals(new TimeFrame("00:01:10,860", "00:01:14,460"), sentence.timeRanges().get(101));
+        assertEquals(new TimeFrame(66, 71), sentence.timeRanges().get(0));
+        assertEquals(new TimeFrame(66, 71), sentence.timeRanges().get(64));
+        assertEquals(new TimeFrame(70, 75), sentence.timeRanges().get(65));
+        assertEquals(new TimeFrame(70, 75), sentence.timeRanges().get(101));
         sentence = sentences.get(1);
         assertEquals("So the Desert Desert.", sentence.text());
-        assertEquals(new TimeFrame("00:01:10,860", "00:01:14,460"), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame("00:01:10,860", "00:01:14,460"), sentence.timeRanges().get(21));
+        assertEquals(new TimeFrame(70, 75), sentence.timeRanges().get(0));
+        assertEquals(new TimeFrame(70, 75), sentence.timeRanges().get(21));
         sentence = sentences.get(2);
         assertEquals("Which keeps happening!", sentence.text());
-        assertEquals(new TimeFrame("00:01:14,460", "00:01:17,520"), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame("00:01:14,460", "00:01:17,520"), sentence.timeRanges().get(22));
+        assertEquals(new TimeFrame(74, 78), sentence.timeRanges().get(0));
+        assertEquals(new TimeFrame(74, 78), sentence.timeRanges().get(22));
         sentence = sentences.get(3);
         assertEquals("Matcha tea is \"powdered tea tea\".", sentence.text());
-        assertEquals(new TimeFrame("00:01:14,460", "00:01:17,520"), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame("00:01:14,460", "00:01:17,520"), sentence.timeRanges().get(33));
+        assertEquals(new TimeFrame(74, 78), sentence.timeRanges().get(0));
+        assertEquals(new TimeFrame(74, 78), sentence.timeRanges().get(33));
     }
 }

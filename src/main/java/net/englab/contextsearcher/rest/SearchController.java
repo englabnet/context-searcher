@@ -1,6 +1,7 @@
 package net.englab.contextsearcher.rest;
 
 import lombok.RequiredArgsConstructor;
+import net.englab.contextsearcher.model.EnglishVariety;
 import net.englab.contextsearcher.model.VideoSearchResult;
 import net.englab.contextsearcher.service.VideoSearcher;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +18,7 @@ public class SearchController {
     private final VideoSearcher videoSearcher;
 
     @GetMapping("/search")
-    public List<VideoSearchResult> search(String phrase) {
-        return videoSearcher.search(phrase);
+    public List<VideoSearchResult> search(String phrase, EnglishVariety variety) {
+        return videoSearcher.search(phrase, variety);
     }
 }

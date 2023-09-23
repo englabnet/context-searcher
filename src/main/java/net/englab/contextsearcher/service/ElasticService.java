@@ -3,11 +3,13 @@ package net.englab.contextsearcher.service;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.mapping.DynamicMapping;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.englab.contextsearcher.elastic.VideoDocument;
+import net.englab.contextsearcher.model.EnglishVariety;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -52,17 +54,13 @@ public class ElasticService {
         }
     }
 
-    public SearchResponse<VideoDocument> searchVideoByPhrase(String index, String field, String phrase) {
+    public SearchResponse<VideoDocument> searchVideoByPhrase(String index, String phrase, EnglishVariety variety) {
         try {
             return elasticsearchClient.search(b -> b
                     .index(index)
-                    .query(q -> q
-                            .matchPhrase(m -> m
-                                    .field(field)
-                                    .query(phrase)
-                            )
-                    ).highlight(h -> h
-                            .fields(field, f -> f
+                    .query(buildVideoQuery(phrase, variety)._toQuery())
+                    .highlight(h -> h
+                            .fields("sentence", f -> f
                                     .numberOfFragments(0)
                             )
                     ), VideoDocument.class);
@@ -70,5 +68,14 @@ public class ElasticService {
             log.error("Exception occurred during doc search", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private static BoolQuery buildVideoQuery(String phrase, EnglishVariety variety) {
+        BoolQuery.Builder builder = new BoolQuery.Builder()
+                .must(m -> m.matchPhrase(p -> p.field("sentence").query(phrase)));
+        if (variety != EnglishVariety.ALL) {
+            builder.filter(f -> f.term(t -> t.field("variety").value(variety.name())));
+        }
+        return builder.build();
     }
 }
