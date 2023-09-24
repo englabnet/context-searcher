@@ -1,9 +1,9 @@
 package net.englab.contextsearcher.rest;
 
 import lombok.RequiredArgsConstructor;
-import net.englab.contextsearcher.model.EnglishVariety;
-import net.englab.contextsearcher.model.VideoSearchResult;
-import net.englab.contextsearcher.service.VideoSearcher;
+import net.englab.contextsearcher.models.EnglishVariety;
+import net.englab.contextsearcher.models.VideoSearchResult;
+import net.englab.contextsearcher.services.VideoSearcher;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

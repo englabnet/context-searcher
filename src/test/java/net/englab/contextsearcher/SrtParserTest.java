@@ -1,7 +1,7 @@
 package net.englab.contextsearcher;
 
-import net.englab.contextsearcher.model.SrtSentence;
-import net.englab.contextsearcher.model.TimeFrame;
+import net.englab.contextsearcher.models.SrtSentence;
+import net.englab.contextsearcher.models.TimeFrame;
 import net.englab.contextsearcher.utils.SrtParser;
 import org.junit.jupiter.api.Test;
 

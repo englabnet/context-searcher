@@ -1,4 +1,4 @@
-package net.englab.contextsearcher.model;
+package net.englab.contextsearcher.models;
 
 public enum EnglishVariety {
     ALL, UK, US, AUS

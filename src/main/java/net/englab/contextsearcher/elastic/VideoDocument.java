@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.englab.contextsearcher.model.TimeFrame;
+import net.englab.contextsearcher.models.TimeFrame;
 
 import java.util.Map;
 

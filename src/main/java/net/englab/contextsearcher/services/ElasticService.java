@@ -1,4 +1,4 @@
-package net.englab.contextsearcher.service;
+package net.englab.contextsearcher.services;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.mapping.DynamicMapping;
@@ -9,7 +9,7 @@ import co.elastic.clients.transport.endpoints.BooleanResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.englab.contextsearcher.elastic.VideoDocument;
-import net.englab.contextsearcher.model.EnglishVariety;
+import net.englab.contextsearcher.models.EnglishVariety;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;

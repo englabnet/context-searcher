@@ -1,8 +1,8 @@
 package net.englab.contextsearcher.rest;
 
 import lombok.RequiredArgsConstructor;
-import net.englab.contextsearcher.model.EnglishVariety;
-import net.englab.contextsearcher.service.VideoIndexer;
+import net.englab.contextsearcher.models.EnglishVariety;
+import net.englab.contextsearcher.services.VideoIndexer;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

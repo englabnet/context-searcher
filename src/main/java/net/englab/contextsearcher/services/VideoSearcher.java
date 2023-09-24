@@ -1,4 +1,4 @@
-package net.englab.contextsearcher.service;
+package net.englab.contextsearcher.services;
 
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.google.common.collect.Range;
@@ -6,9 +6,9 @@ import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 import lombok.RequiredArgsConstructor;
 import net.englab.contextsearcher.elastic.VideoDocument;
-import net.englab.contextsearcher.model.EnglishVariety;
-import net.englab.contextsearcher.model.TimeFrame;
-import net.englab.contextsearcher.model.VideoSearchResult;
+import net.englab.contextsearcher.models.EnglishVariety;
+import net.englab.contextsearcher.models.TimeFrame;
+import net.englab.contextsearcher.models.VideoSearchResult;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

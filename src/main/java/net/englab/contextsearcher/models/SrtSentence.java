@@ -1,4 +1,4 @@
-package net.englab.contextsearcher.model;
+package net.englab.contextsearcher.models;
 
 import com.google.common.collect.RangeMap;
 

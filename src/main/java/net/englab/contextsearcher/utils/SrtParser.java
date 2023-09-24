@@ -6,8 +6,8 @@ import com.google.common.collect.TreeRangeMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.englab.contextsearcher.model.SrtSentence;
-import net.englab.contextsearcher.model.TimeFrame;
+import net.englab.contextsearcher.models.SrtSentence;
+import net.englab.contextsearcher.models.TimeFrame;
 
 import java.io.BufferedReader;
 import java.io.IOException;
