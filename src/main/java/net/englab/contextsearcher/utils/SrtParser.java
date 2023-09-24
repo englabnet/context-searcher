@@ -5,8 +5,10 @@ import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.englab.contextsearcher.models.SrtSentence;
+import net.englab.contextsearcher.models.SubtitleBlock;
 import net.englab.contextsearcher.models.TimeFrame;
 
 import java.io.BufferedReader;
@@ -105,9 +107,47 @@ public class SrtParser {
 
     private static TimeFrame parseTimeFrame(String line) {
         String[] timeInfo = line.split("-->");
-        long startTime = (long) Math.floor(convertToSeconds(timeInfo[0].strip()));
-        long endTime = (long) Math.ceil(convertToSeconds(timeInfo[1].strip()));
+        double startTime = convertToSeconds(timeInfo[0].strip());
+        double endTime = convertToSeconds(timeInfo[1].strip());
         return new TimeFrame(startTime, endTime);
+    }
+
+    public static List<SubtitleBlock> parseSubtitles(String srt) {
+        try (BufferedReader srtReader = new BufferedReader(new StringReader(srt))) {
+            List<SubtitleBlock> subtitles = new ArrayList<>();
+
+            String line = srtReader.readLine();
+            while (line != null) {
+                subtitles.add(parseSubtitleBlock(srtReader));
+                line = srtReader.readLine();
+            }
+
+            return subtitles;
+        } catch (IOException e) {
+            log.error("Exception occurred during video indexing", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @SneakyThrows
+    private static SubtitleBlock parseSubtitleBlock(BufferedReader srtReader) {
+        SubtitleBlock subtitleBlock = new SubtitleBlock();
+
+        String[] timeInfo = srtReader.readLine().split("-->");
+        subtitleBlock.setStartTime(convertToSeconds(timeInfo[0].strip()));
+        subtitleBlock.setEndTime(convertToSeconds(timeInfo[1].strip()));
+
+        String line = srtReader.readLine();
+        while (line != null && !line.equals("")) {
+            String previousText = subtitleBlock.getText();
+            if (previousText.isEmpty()) {
+                subtitleBlock.setText(line);
+            } else {
+                subtitleBlock.setText(previousText + " " + line);
+            }
+            line = srtReader.readLine();
+        }
+        return subtitleBlock;
     }
 
     private static double convertToSeconds(String timeString) {

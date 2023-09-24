@@ -6,6 +6,7 @@ import net.englab.contextsearcher.repositories.VideoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,5 +27,9 @@ public class VideoStorage {
 
     public List<Video> findAll() {
         return videoRepository.findAll();
+    }
+
+    public Optional<Video> findByVideoId(String videoId) {
+        return videoRepository.findByVideoId(videoId);
     }
 }

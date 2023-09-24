@@ -7,8 +7,12 @@ import com.google.common.collect.TreeRangeMap;
 import lombok.RequiredArgsConstructor;
 import net.englab.contextsearcher.elastic.VideoDocument;
 import net.englab.contextsearcher.models.EnglishVariety;
+import net.englab.contextsearcher.models.SubtitleBlock;
 import net.englab.contextsearcher.models.TimeFrame;
-import net.englab.contextsearcher.models.VideoSearchResult;
+import net.englab.contextsearcher.models.dto.VideoSearchResponse;
+import net.englab.contextsearcher.models.dto.VideoSearchResult;
+import net.englab.contextsearcher.models.entities.Video;
+import net.englab.contextsearcher.utils.SrtParser;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,13 +24,16 @@ import java.util.stream.Collectors;
 public class VideoSearcher {
 
     private final ElasticService elasticService;
+    private final VideoStorage videoStorage;
 
-    public List<VideoSearchResult> search(String phrase, EnglishVariety variety) {
+    public VideoSearchResponse search(String phrase, EnglishVariety variety) {
         var searchResponse = elasticService.searchVideoByPhrase("videos", phrase, variety);
 
-        return searchResponse.hits().hits().stream()
+        List<VideoSearchResult> videos = searchResponse.hits().hits().stream()
                 .map(this::buildSearchResponse)
                 .collect(Collectors.toList());
+
+        return new VideoSearchResponse(searchResponse.hits().total().value(), videos);
     }
 
     private VideoSearchResult buildSearchResponse(Hit<VideoDocument> hit) {
@@ -39,10 +46,16 @@ public class VideoSearcher {
         int endIndex = doc.getSentence().length() - parts[parts.length - 1].length() - 1;
 
         RangeMap<Integer, TimeFrame> ranges = mapToRanges(doc.getTimeRanges());
-        long startTimeInSec = ranges.get(startIndex).startTime();
-        long endTimeInSec = ranges.get(endIndex).endTime();
+        double startTimeInSec = ranges.get(startIndex).startTime();
+        double endTimeInSec = ranges.get(endIndex).endTime();
         TimeFrame timeFrame = new TimeFrame(startTimeInSec, endTimeInSec);
-        return new VideoSearchResult(doc.getVideoId(), timeFrame, doc.getSentence());
+
+        List<SubtitleBlock> subtitles = videoStorage.findByVideoId(doc.getVideoId())
+                .map(Video::getSrt)
+                .map(SrtParser::parseSubtitles)
+                .orElse(null);
+
+        return new VideoSearchResult(doc.getVideoId(), timeFrame, subtitles);
     }
 
     private RangeMap<Integer, TimeFrame> mapToRanges(Map<String, TimeFrame> map) {
