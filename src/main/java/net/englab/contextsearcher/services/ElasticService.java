@@ -54,10 +54,12 @@ public class ElasticService {
         }
     }
 
-    public SearchResponse<VideoDocument> searchVideoByPhrase(String index, String phrase, EnglishVariety variety) {
+    public SearchResponse<VideoDocument> searchVideoByPhrase(String index, String phrase, EnglishVariety variety, int from, int size) {
         try {
             return elasticsearchClient.search(b -> b
                     .index(index)
+                    .from(from)
+                    .size(size)
                     .query(buildVideoQuery(phrase, variety)._toQuery())
                     .highlight(h -> h
                             .fields("sentence", f -> f

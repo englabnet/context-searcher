@@ -26,8 +26,8 @@ public class VideoSearcher {
     private final ElasticService elasticService;
     private final VideoStorage videoStorage;
 
-    public VideoSearchResponse search(String phrase, EnglishVariety variety) {
-        var searchResponse = elasticService.searchVideoByPhrase("videos", phrase, variety);
+    public VideoSearchResponse search(String phrase, EnglishVariety variety, int from, int size) {
+        var searchResponse = elasticService.searchVideoByPhrase("videos", phrase, variety, from, size);
 
         List<VideoSearchResult> videos = searchResponse.hits().hits().stream()
                 .map(this::buildSearchResponse)
