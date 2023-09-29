@@ -24,7 +24,7 @@ public class IndexingController {
      */
     @PostMapping("/index")
     public String index(@RequestParam String videoId, @RequestParam EnglishVariety variety, @RequestBody String srt) {
-        videoIndexer.indexVideo(videoId, variety, srt);
+        videoIndexer.index(videoId, variety, srt);
         return "index";
     }
 
@@ -35,7 +35,7 @@ public class IndexingController {
      */
     @PostMapping("/reindex")
     public String reindex() {
-        // todo: implement
+        videoIndexer.reindexAll();
         return "reindex";
     }
 

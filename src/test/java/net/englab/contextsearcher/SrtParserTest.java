@@ -1,7 +1,6 @@
 package net.englab.contextsearcher;
 
 import net.englab.contextsearcher.models.SrtSentence;
-import net.englab.contextsearcher.models.TimeFrame;
 import net.englab.contextsearcher.utils.SrtParser;
 import org.junit.jupiter.api.Test;
 
@@ -43,14 +42,14 @@ class SrtParserTest {
                 "probably since it's fairly straightforward to point at an object, say the word for it, and have the other " +
                 "person understand that’s what you’re talking about.";
         assertEquals(expectedText, sentence.text());
-        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(58));
-        assertEquals(new TimeFrame(3, 7), sentence.timeRanges().get(59));
-        assertEquals(new TimeFrame(3, 7), sentence.timeRanges().get(130));
-        assertEquals(new TimeFrame(6, 9), sentence.timeRanges().get(131));
-        assertEquals(new TimeFrame(6, 9), sentence.timeRanges().get(174));
-        assertEquals(new TimeFrame(8, 12), sentence.timeRanges().get(175));
-        assertEquals(new TimeFrame(8, 12), sentence.timeRanges().get(246));
+        assertEquals(0, sentence.subtitleBlocks().get(0));
+        assertEquals(0, sentence.subtitleBlocks().get(58));
+        assertEquals(1, sentence.subtitleBlocks().get(59));
+        assertEquals(1, sentence.subtitleBlocks().get(130));
+        assertEquals(2, sentence.subtitleBlocks().get(131));
+        assertEquals(2, sentence.subtitleBlocks().get(174));
+        assertEquals(3, sentence.subtitleBlocks().get(175));
+        assertEquals(3, sentence.subtitleBlocks().get(246));
     }
 
     @Test
@@ -71,38 +70,38 @@ class SrtParserTest {
         assertEquals(4, sentences.size());
         SrtSentence sentence = sentences.get(0);
         assertEquals("Hello world!", sentence.text());
-        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(12));
+        assertEquals(0, sentence.subtitleBlocks().get(0));
+        assertEquals(0, sentence.subtitleBlocks().get(12));
         sentence = sentences.get(1);
         assertEquals("How are you?", sentence.text());
-        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(11));
+        assertEquals(0, sentence.subtitleBlocks().get(0));
+        assertEquals(0, sentence.subtitleBlocks().get(11));
         sentence = sentences.get(2);
         assertEquals("I'm fine.", sentence.text());
-        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(8));
+        assertEquals(0, sentence.subtitleBlocks().get(0));
+        assertEquals(0, sentence.subtitleBlocks().get(8));
         sentence = sentences.get(3);
         assertEquals("This is a test that will catch bugs!", sentence.text());
-        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame(0, 3), sentence.timeRanges().get(13));
-        assertEquals(new TimeFrame(3, 7), sentence.timeRanges().get(14));
-        assertEquals(new TimeFrame(3, 7), sentence.timeRanges().get(36));
+        assertEquals(0, sentence.subtitleBlocks().get(0));
+        assertEquals(0, sentence.subtitleBlocks().get(13));
+        assertEquals(1, sentence.subtitleBlocks().get(14));
+        assertEquals(1, sentence.subtitleBlocks().get(36));
     }
 
     @Test
     void testShortSentences2() {
         String text = """
-                22
+                1
                 00:01:06,960 --> 00:01:10,860
                 The Arabic word /sˤaħ raːʔ/ for "deserts"
                 became the English word
                                 
-                23
+                2
                 00:01:10,860 --> 00:01:14,460
                 specifically for the Sahara Desert.
                 So the Desert Desert.
                                 
-                24
+                3
                 00:01:14,460 --> 00:01:17,520
                 Which keeps happening!
                 Matcha tea is "powdered tea tea".
@@ -115,21 +114,21 @@ class SrtParserTest {
         String expectedText = "The Arabic word /sˤaħ raːʔ/ for \"deserts\" became " +
                 "the English word specifically for the Sahara Desert.";
         assertEquals(expectedText, sentence.text());
-        assertEquals(new TimeFrame(66, 71), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame(66, 71), sentence.timeRanges().get(64));
-        assertEquals(new TimeFrame(70, 75), sentence.timeRanges().get(65));
-        assertEquals(new TimeFrame(70, 75), sentence.timeRanges().get(101));
+        assertEquals(0, sentence.subtitleBlocks().get(0));
+        assertEquals(0, sentence.subtitleBlocks().get(64));
+        assertEquals(1, sentence.subtitleBlocks().get(65));
+        assertEquals(1, sentence.subtitleBlocks().get(101));
         sentence = sentences.get(1);
         assertEquals("So the Desert Desert.", sentence.text());
-        assertEquals(new TimeFrame(70, 75), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame(70, 75), sentence.timeRanges().get(21));
+        assertEquals(1, sentence.subtitleBlocks().get(0));
+        assertEquals(1, sentence.subtitleBlocks().get(21));
         sentence = sentences.get(2);
         assertEquals("Which keeps happening!", sentence.text());
-        assertEquals(new TimeFrame(74, 78), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame(74, 78), sentence.timeRanges().get(22));
+        assertEquals(2, sentence.subtitleBlocks().get(0));
+        assertEquals(2, sentence.subtitleBlocks().get(22));
         sentence = sentences.get(3);
         assertEquals("Matcha tea is \"powdered tea tea\".", sentence.text());
-        assertEquals(new TimeFrame(74, 78), sentence.timeRanges().get(0));
-        assertEquals(new TimeFrame(74, 78), sentence.timeRanges().get(33));
+        assertEquals(2, sentence.subtitleBlocks().get(0));
+        assertEquals(2, sentence.subtitleBlocks().get(33));
     }
 }

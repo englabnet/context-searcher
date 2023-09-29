@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.englab.contextsearcher.elastic.VideoDocument;
 import net.englab.contextsearcher.models.EnglishVariety;
 import net.englab.contextsearcher.models.SrtSentence;
-import net.englab.contextsearcher.models.TimeFrame;
 import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.utils.SrtParser;
 import org.springframework.stereotype.Service;
@@ -29,31 +28,42 @@ public class VideoIndexer {
     private final VideoStorage videoStorage;
     private final ElasticService elasticService;
 
-    public void indexVideo(String videoId, EnglishVariety variety, String srt) {
+    public void index(String videoId, EnglishVariety variety, String srt) {
         Long id = videoStorage.save(new Video(null, videoId, variety, srt));
         try {
-            List<SrtSentence> sentences = SrtParser.parseSentences(srt);
-            elasticService.createIndexIfAbsent(VIDEOS_INDEX, Map.of(
-                    "video_id", NON_SEARCHABLE_TEXT_PROPERTY,
-                    "sentence", TEXT_PROPERTY,
-                    "variety", KEYWORD_PROPERTY,
-                    "time_ranges", ObjectProperty.of(b -> b.enabled(false))._toProperty()
-            ));
-
-            sentences.forEach(sentence -> {
-                String docId = UUID.randomUUID().toString();
-                RangeMap<Integer, TimeFrame> ranges = sentence.timeRanges(); // todo: use the bulk api
-                var doc = new VideoDocument(videoId, variety.name(), sentence.text(), rangesToMap(ranges));
-                elasticService.indexDocument(VIDEOS_INDEX, docId, doc);
-            });
+            indexVideo(videoId, variety, srt);
         } catch (Exception e) {
             log.error("Exception occurred during video indexing", e);
             videoStorage.deleteById(id);
         }
     }
 
-    public Map<String, TimeFrame> rangesToMap(RangeMap<Integer, TimeFrame> ranges) {
+    public void reindexAll() {
+        elasticService.removeIndex("videos");
+        videoStorage.findAll().forEach(video ->
+                indexVideo(video.getVideoId(), video.getVariety(), video.getSrt())
+        );
+    }
+
+    private void indexVideo(String videoId, EnglishVariety variety, String srt) {
+        List<SrtSentence> sentences = SrtParser.parseSentences(srt);
+        elasticService.createIndexIfAbsent(VIDEOS_INDEX, Map.of(
+                "video_id", NON_SEARCHABLE_TEXT_PROPERTY,
+                "sentence", TEXT_PROPERTY,
+                "variety", KEYWORD_PROPERTY,
+                "subtitle_blocks", ObjectProperty.of(b -> b.enabled(false))._toProperty()
+        ));
+
+        sentences.forEach(sentence -> {
+            String docId = UUID.randomUUID().toString();
+            RangeMap<Integer, Integer> ranges = sentence.subtitleBlocks(); // todo: use the bulk api
+            var doc = new VideoDocument(videoId, variety.name(), sentence.text(), rangesToMap(ranges));
+            elasticService.indexDocument(VIDEOS_INDEX, docId, doc);
+        });
+    }
+
+    public Map<String, Integer> rangesToMap(RangeMap<Integer, Integer> ranges) {
         return ranges.asMapOfRanges().entrySet().stream()
-                .collect(Collectors.toMap(k -> k.getKey().toString(), Map.Entry::getValue));
+                .collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue));
     }
 }

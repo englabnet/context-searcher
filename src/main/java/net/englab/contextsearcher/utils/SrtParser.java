@@ -9,7 +9,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.englab.contextsearcher.models.SrtSentence;
 import net.englab.contextsearcher.models.SubtitleBlock;
-import net.englab.contextsearcher.models.TimeFrame;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,12 +29,13 @@ public class SrtParser {
         try (BufferedReader srtReader = new BufferedReader(new StringReader(srt))) {
             List<SrtSentence> sentences = new ArrayList<>();
 
-            RangeMap<Integer, TimeFrame> currentTimeFrames = TreeRangeMap.create();
+            RangeMap<Integer, Integer> currentBlocks = TreeRangeMap.create();
             String currentSentence = "";
 
             String line = srtReader.readLine();
             while (line != null) {
-                TimeFrame timeFrame = parseTimeFrame(srtReader.readLine());
+                Integer currentIndex = Integer.parseInt(line) - 1;
+                srtReader.readLine(); // Time frame
                 line = srtReader.readLine();
                 int startPoint = currentSentence.length();
                 while (line != null && !line.equals("")) {
@@ -44,31 +44,31 @@ public class SrtParser {
                         var ending = str.get(0);
                         var text = concatStrings(currentSentence, ending);
 
-                        currentTimeFrames.put(Range.closed(startPoint, text.length()), timeFrame);
+                        currentBlocks.put(Range.closed(startPoint, text.length()), currentIndex);
 
-                        sentences.add(new SrtSentence(currentTimeFrames, text));
+                        sentences.add(new SrtSentence(currentBlocks, text));
                         currentSentence = "";
-                        currentTimeFrames = TreeRangeMap.create();
+                        currentBlocks = TreeRangeMap.create();
                         startPoint = 0;
                     }
                     for (int i = 1; i < str.size() - 1; i++) {
                         var sentence = str.get(i);
-                        currentTimeFrames.put(Range.closed(0, sentence.length() - 1), timeFrame);
-                        sentences.add(new SrtSentence(currentTimeFrames, str.get(i)));
-                        currentTimeFrames = TreeRangeMap.create();
+                        currentBlocks.put(Range.closed(0, sentence.length() - 1), currentIndex);
+                        sentences.add(new SrtSentence(currentBlocks, str.get(i)));
+                        currentBlocks = TreeRangeMap.create();
                     }
                     String rest = str.get(str.size() - 1);
                     currentSentence = concatStrings(currentSentence, rest);
                     line = srtReader.readLine();
                 }
-                line = srtReader.readLine();
                 if (!currentSentence.isEmpty()) {
-                    currentTimeFrames.put(Range.closed(startPoint, currentSentence.length()), timeFrame);
+                    currentBlocks.put(Range.closed(startPoint, currentSentence.length()), currentIndex);
                 }
+                line = srtReader.readLine();
             }
 
             if (!currentSentence.isEmpty()) {
-                sentences.add(new SrtSentence(currentTimeFrames, currentSentence));
+                sentences.add(new SrtSentence(currentBlocks, currentSentence));
             }
 
             return sentences;
@@ -105,13 +105,6 @@ public class SrtParser {
         return sentences;
     }
 
-    private static TimeFrame parseTimeFrame(String line) {
-        String[] timeInfo = line.split("-->");
-        double startTime = convertToSeconds(timeInfo[0].strip());
-        double endTime = convertToSeconds(timeInfo[1].strip());
-        return new TimeFrame(startTime, endTime);
-    }
-
     public static List<SubtitleBlock> parseSubtitles(String srt) {
         try (BufferedReader srtReader = new BufferedReader(new StringReader(srt))) {
             List<SubtitleBlock> subtitles = new ArrayList<>();
@@ -138,15 +131,17 @@ public class SrtParser {
         subtitleBlock.setEndTime(convertToSeconds(timeInfo[1].strip()));
 
         String line = srtReader.readLine();
+
+        String text = "";
         while (line != null && !line.equals("")) {
-            String previousText = subtitleBlock.getText();
-            if (previousText.isEmpty()) {
-                subtitleBlock.setText(line);
+            if (text.isBlank()) {
+                text = line;
             } else {
-                subtitleBlock.setText(previousText + " " + line);
+                text += " " + line; // todo: fix
             }
             line = srtReader.readLine();
         }
+        subtitleBlock.setText(List.of(text));
         return subtitleBlock;
     }
 

@@ -8,13 +8,13 @@ import lombok.RequiredArgsConstructor;
 import net.englab.contextsearcher.elastic.VideoDocument;
 import net.englab.contextsearcher.models.EnglishVariety;
 import net.englab.contextsearcher.models.SubtitleBlock;
-import net.englab.contextsearcher.models.TimeFrame;
 import net.englab.contextsearcher.models.dto.VideoSearchResponse;
 import net.englab.contextsearcher.models.dto.VideoSearchResult;
 import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.utils.SrtParser;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,28 +43,47 @@ public class VideoSearcher {
         String[] parts = highlight.split("<em>|</em>");
 
         int startIndex = parts[0].length();
-        int endIndex = doc.getSentence().length() - parts[parts.length - 1].length() - 1;
 
-        RangeMap<Integer, TimeFrame> ranges = mapToRanges(doc.getTimeRanges());
-        double startTimeInSec = ranges.get(startIndex).startTime();
-        double endTimeInSec = ranges.get(endIndex).endTime();
-        TimeFrame timeFrame = new TimeFrame(startTimeInSec, endTimeInSec);
+        RangeMap<Integer, Integer> ranges = mapToRanges(doc.getSubtitleBlocks());
+        int index = ranges.get(startIndex);
 
         List<SubtitleBlock> subtitles = videoStorage.findByVideoId(doc.getVideoId())
                 .map(Video::getSrt)
                 .map(SrtParser::parseSubtitles)
                 .orElse(null);
 
-        return new VideoSearchResult(doc.getVideoId(), timeFrame, subtitles);
+        calculateHighlighting(index, subtitles, parts);
+
+        return new VideoSearchResult(doc.getVideoId(), index, subtitles);
     }
 
-    private RangeMap<Integer, TimeFrame> mapToRanges(Map<String, TimeFrame> map) {
-        RangeMap<Integer, TimeFrame> ranges = TreeRangeMap.create();
+    private RangeMap<Integer, Integer> mapToRanges(Map<String, Integer> map) {
+        RangeMap<Integer, Integer> ranges = TreeRangeMap.create();
         map.forEach((key, value) -> {
             String strRange = key.substring(1, key.length() - 1);
             String[] range = strRange.split("\\.\\.");
             ranges.put(Range.closed(Integer.valueOf(range[0]), Integer.valueOf(range[1])), value);
         });
         return ranges;
+    }
+
+    private void calculateHighlighting(int index, List<SubtitleBlock> subtitles, String[] parts) {
+        int currentBlock = index;
+        int currentPart = 1;
+        for (; currentBlock < subtitles.size() && currentPart < parts.length; currentBlock++) {
+            SubtitleBlock subtitleBlock = subtitles.get(currentBlock);
+            String text = subtitleBlock.getText().get(0);
+            List<String> result = new ArrayList<>();
+            for (; currentPart < parts.length; currentPart += 2) {
+                String p = parts[currentPart];
+                int start = text.indexOf(p);
+                if (start == -1) break;
+                result.add(text.substring(0, start));
+                result.add(p);
+                text = text.substring(start + p.length());
+            }
+            result.add(text);
+            subtitleBlock.setText(result);
+        }
     }
 }

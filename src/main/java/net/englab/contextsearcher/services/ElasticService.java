@@ -41,6 +41,15 @@ public class ElasticService {
         }
     }
 
+    public void removeIndex(String index) {
+        try {
+            elasticsearchClient.indices().delete(d -> d.index(index));
+        } catch (IOException e) {
+            log.error("Exception occurred during index creation", e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public void indexDocument(String index, String id, Object value) {
         try {
             elasticsearchClient.create(b -> b

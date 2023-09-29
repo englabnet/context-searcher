@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.englab.contextsearcher.models.TimeFrame;
 
 import java.util.Map;
 
@@ -16,6 +15,6 @@ public class VideoDocument {
     private String videoId;
     private String variety;
     private String sentence;
-    @JsonProperty("time_ranges")
-    private Map<String, TimeFrame> timeRanges;
+    @JsonProperty("subtitle_blocks")
+    private Map<String, Integer> subtitleBlocks;
 }
