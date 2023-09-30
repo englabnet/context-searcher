@@ -8,7 +8,8 @@ import net.englab.contextsearcher.elastic.VideoDocument;
 import net.englab.contextsearcher.models.EnglishVariety;
 import net.englab.contextsearcher.models.SrtSentence;
 import net.englab.contextsearcher.models.entities.Video;
-import net.englab.contextsearcher.utils.SrtParser;
+import net.englab.contextsearcher.utils.SrtSentenceParser;
+import net.englab.contextsearcher.utils.SrtSubtitles;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,7 +47,8 @@ public class VideoIndexer {
     }
 
     private void indexVideo(String videoId, EnglishVariety variety, String srt) {
-        List<SrtSentence> sentences = SrtParser.parseSentences(srt);
+        SrtSubtitles subtitles = new SrtSubtitles(srt);
+        List<SrtSentence> sentences = SrtSentenceParser.parse(subtitles);
         elasticService.createIndexIfAbsent(VIDEOS_INDEX, Map.of(
                 "video_id", NON_SEARCHABLE_TEXT_PROPERTY,
                 "sentence", TEXT_PROPERTY,

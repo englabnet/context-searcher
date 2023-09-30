@@ -1,14 +1,15 @@
-package net.englab.contextsearcher;
+package net.englab.contextsearcher.utls;
 
 import net.englab.contextsearcher.models.SrtSentence;
-import net.englab.contextsearcher.utils.SrtParser;
+import net.englab.contextsearcher.utils.SrtSentenceParser;
+import net.englab.contextsearcher.utils.SrtSubtitles;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-class SrtParserTest {
+class SrtSentenceParserTest {
 
     @Test
     void testLongSentence() {
@@ -34,7 +35,9 @@ class SrtParserTest {
                 that’s what you’re talking about.
                 """;
 
-        List<SrtSentence> sentences = SrtParser.parseSentences(text);
+        SrtSubtitles subtitles = new SrtSubtitles(text);
+
+        List<SrtSentence> sentences = SrtSentenceParser.parse(subtitles);
 
         assertEquals(1, sentences.size());
         SrtSentence sentence = sentences.get(0);
@@ -49,7 +52,7 @@ class SrtParserTest {
         assertEquals(2, sentence.subtitleBlocks().get(131));
         assertEquals(2, sentence.subtitleBlocks().get(174));
         assertEquals(3, sentence.subtitleBlocks().get(175));
-        assertEquals(3, sentence.subtitleBlocks().get(246));
+        assertEquals(3, sentence.subtitleBlocks().get(245));
     }
 
     @Test
@@ -65,13 +68,15 @@ class SrtParserTest {
                 that will catch bugs!
                 """;
 
-        List<SrtSentence> sentences = SrtParser.parseSentences(text);
+        SrtSubtitles subtitles = new SrtSubtitles(text);
+
+        List<SrtSentence> sentences = SrtSentenceParser.parse(subtitles);
 
         assertEquals(4, sentences.size());
         SrtSentence sentence = sentences.get(0);
         assertEquals("Hello world!", sentence.text());
         assertEquals(0, sentence.subtitleBlocks().get(0));
-        assertEquals(0, sentence.subtitleBlocks().get(12));
+        assertEquals(0, sentence.subtitleBlocks().get(11));
         sentence = sentences.get(1);
         assertEquals("How are you?", sentence.text());
         assertEquals(0, sentence.subtitleBlocks().get(0));
@@ -85,7 +90,7 @@ class SrtParserTest {
         assertEquals(0, sentence.subtitleBlocks().get(0));
         assertEquals(0, sentence.subtitleBlocks().get(13));
         assertEquals(1, sentence.subtitleBlocks().get(14));
-        assertEquals(1, sentence.subtitleBlocks().get(36));
+        assertEquals(1, sentence.subtitleBlocks().get(35));
     }
 
     @Test
@@ -107,7 +112,9 @@ class SrtParserTest {
                 Matcha tea is "powdered tea tea".
                 """;
 
-        List<SrtSentence> sentences = SrtParser.parseSentences(text);
+        SrtSubtitles subtitles = new SrtSubtitles(text);
+
+        List<SrtSentence> sentences = SrtSentenceParser.parse(subtitles);
 
         assertEquals(4, sentences.size());
         SrtSentence sentence = sentences.get(0);
@@ -117,18 +124,18 @@ class SrtParserTest {
         assertEquals(0, sentence.subtitleBlocks().get(0));
         assertEquals(0, sentence.subtitleBlocks().get(64));
         assertEquals(1, sentence.subtitleBlocks().get(65));
-        assertEquals(1, sentence.subtitleBlocks().get(101));
+        assertEquals(1, sentence.subtitleBlocks().get(100));
         sentence = sentences.get(1);
         assertEquals("So the Desert Desert.", sentence.text());
         assertEquals(1, sentence.subtitleBlocks().get(0));
-        assertEquals(1, sentence.subtitleBlocks().get(21));
+        assertEquals(1, sentence.subtitleBlocks().get(20));
         sentence = sentences.get(2);
         assertEquals("Which keeps happening!", sentence.text());
         assertEquals(2, sentence.subtitleBlocks().get(0));
-        assertEquals(2, sentence.subtitleBlocks().get(22));
+        assertEquals(2, sentence.subtitleBlocks().get(21));
         sentence = sentences.get(3);
         assertEquals("Matcha tea is \"powdered tea tea\".", sentence.text());
         assertEquals(2, sentence.subtitleBlocks().get(0));
-        assertEquals(2, sentence.subtitleBlocks().get(33));
+        assertEquals(2, sentence.subtitleBlocks().get(32));
     }
 }
