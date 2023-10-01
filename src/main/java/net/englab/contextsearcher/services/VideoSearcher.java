@@ -12,9 +12,9 @@ import net.englab.contextsearcher.models.dto.VideoSearchResponse;
 import net.englab.contextsearcher.models.dto.VideoSearchResult;
 import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.utils.SrtParser;
+import net.englab.contextsearcher.utils.SubtitleHighlighter;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,21 +39,20 @@ public class VideoSearcher {
     private VideoSearchResult buildSearchResponse(Hit<VideoDocument> hit) {
         VideoDocument doc = hit.source();
 
-        String highlight = hit.highlight().get("sentence").get(0);
-        String[] parts = highlight.split("<em>|</em>");
-
-        int startIndex = parts[0].length();
-
-        RangeMap<Integer, Integer> ranges = mapToRanges(doc.getSubtitleBlocks());
-        int index = ranges.get(startIndex);
-
         List<SubtitleBlock> subtitles = videoStorage.findByVideoId(doc.getVideoId())
                 .map(Video::getSrt)
                 .map(SrtParser::parseSubtitles)
                 .orElse(null);
 
-        calculateHighlighting(index, subtitles, parts);
+        String highlight = hit.highlight().get("sentence").get(0);
+        String[] parts = highlight.split("<em>|</em>");
+        RangeMap<Integer, Integer> ranges = mapToRanges(doc.getSubtitleBlocks());
 
+        int startIndex = ranges.get(0);
+        int endIndex = ranges.get(doc.getSentence().length() - 1);
+        SubtitleHighlighter.highlight(doc.getSentence(), parts, subtitles.subList(startIndex, endIndex + 1));
+
+        int index = ranges.get(parts[0].length());
         return new VideoSearchResult(doc.getVideoId(), index, subtitles);
     }
 
@@ -65,25 +64,5 @@ public class VideoSearcher {
             ranges.put(Range.closed(Integer.valueOf(range[0]), Integer.valueOf(range[1])), value);
         });
         return ranges;
-    }
-
-    private void calculateHighlighting(int index, List<SubtitleBlock> subtitles, String[] parts) {
-        int currentBlock = index;
-        int currentPart = 1;
-        for (; currentBlock < subtitles.size() && currentPart < parts.length; currentBlock++) {
-            SubtitleBlock subtitleBlock = subtitles.get(currentBlock);
-            String text = subtitleBlock.getText().get(0);
-            List<String> result = new ArrayList<>();
-            for (; currentPart < parts.length; currentPart += 2) {
-                String p = parts[currentPart];
-                int start = text.indexOf(p);
-                if (start == -1) break;
-                result.add(text.substring(0, start));
-                result.add(p);
-                text = text.substring(start + p.length());
-            }
-            result.add(text);
-            subtitleBlock.setText(result);
-        }
     }
 }

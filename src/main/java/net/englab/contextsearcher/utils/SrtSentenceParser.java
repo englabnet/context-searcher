@@ -3,7 +3,8 @@ package net.englab.contextsearcher.utils;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
-import lombok.RequiredArgsConstructor;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.englab.contextsearcher.models.SrtSentence;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.regex.Pattern;
 
 import static net.englab.contextsearcher.utils.SrtSubtitles.*;
 
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SrtSentenceParser {
     private final static Pattern SENTENCE_PATTERN = Pattern.compile("[^.!?]+([.!?]|$)");
 
