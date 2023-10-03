@@ -2,10 +2,11 @@ package net.englab.contextsearcher.utls;
 
 import net.englab.contextsearcher.models.SubtitleBlock;
 import net.englab.contextsearcher.utils.SubtitleHighlighter;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class SubtitleHighlighterTest {
 
@@ -41,6 +42,6 @@ class SubtitleHighlighterTest {
                 new SubtitleBlock(0.0, 0.0, List.of("blue shifted all ", "the", " way from ", "the", " microwave to visible red light. Over the"))
         );
 
-        Assertions.assertEquals(expectedBlocks, blocks);
+        assertEquals(expectedBlocks, blocks);
     }
 }

@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SrtParser {
