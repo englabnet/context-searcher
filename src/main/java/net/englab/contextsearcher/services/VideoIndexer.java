@@ -29,18 +29,32 @@ public class VideoIndexer {
     private final VideoStorage videoStorage;
     private final ElasticService elasticService;
 
-    public void index(String videoId, EnglishVariety variety, String srt) {
+    public void add(String videoId, EnglishVariety variety, String srt, boolean index) {
         Long id = videoStorage.save(new Video(null, videoId, variety, srt));
+        if (!index) return;
         try {
             indexVideo(videoId, variety, srt);
         } catch (Exception e) {
             log.error("Exception occurred during video indexing", e);
             videoStorage.deleteById(id);
+            throw new RuntimeException(e);
         }
     }
 
+    public void remove(String videoId, boolean index) {
+        if (index) {
+            try {
+                elasticService.removeVideo(VIDEOS_INDEX, videoId);
+            } catch (Exception e) {
+                log.error("Exception occurred during video removal", e);
+                throw new RuntimeException(e);
+            }
+        }
+        videoStorage.deleteByVideoId(videoId);
+    }
+
     public void reindexAll() {
-        elasticService.removeIndex("videos");
+        elasticService.removeIndex(VIDEOS_INDEX);
         videoStorage.findAll().forEach(video ->
                 indexVideo(video.getVideoId(), video.getVariety(), video.getSrt())
         );

@@ -50,6 +50,23 @@ public class ElasticService {
         }
     }
 
+    public void removeVideo(String index, String videoId) {
+        try {
+            elasticsearchClient.deleteByQuery(d -> d
+                    .index(index)
+                    .query(q -> q
+                            .term(t -> t
+                                    .field("video_id")
+                                    .value(videoId)
+                            )
+                    )
+            );
+        } catch (IOException e) {
+            log.error("Exception occurred during video removal", e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public void indexDocument(String index, String id, Object value) {
         try {
             elasticsearchClient.create(b -> b

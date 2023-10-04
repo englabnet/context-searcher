@@ -15,23 +15,41 @@ public class IndexingController {
     private final VideoIndexer videoIndexer;
 
     /**
-     * Indexes the given video and its subtitles.
+     * Adds the given video.
      *
      * @param videoId   the video id
      * @param variety   the variety of English used in the video
-     * @param srt       the subtitles for the video in SRT format.
-     * @return the status after attempting to index.
+     * @param index     true if we want to add it to the index as well
+     * @param srt       the subtitles for the video in SRT format
+     * @return the status after adding
      */
-    @PostMapping("/index")
-    public String index(@RequestParam String videoId, @RequestParam EnglishVariety variety, @RequestBody String srt) {
-        videoIndexer.index(videoId, variety, srt);
-        return "index";
+    @PostMapping("/add")
+    public String add(
+            @RequestParam String videoId,
+            @RequestParam EnglishVariety variety,
+            @RequestParam boolean index,
+            @RequestBody String srt) {
+        videoIndexer.add(videoId, variety, srt, index);
+        return "add";
     }
 
     /**
-     * Full reindex.
+     * Removes the given video.
      *
-     * @return the current status
+     * @param videoId   the video id
+     * @param index     true if we want to remove it from the index as well
+     * @return the status after removing
+     */
+    @PostMapping("/remove")
+    public String remove(@RequestParam String videoId, @RequestParam boolean index) {
+        videoIndexer.remove(videoId, index);
+        return "remove";
+    }
+
+    /**
+     * Full reindexing.
+     *
+     * @return the status after reindexing
      */
     @PostMapping("/reindex")
     public String reindex() {

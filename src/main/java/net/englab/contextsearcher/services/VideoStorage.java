@@ -1,5 +1,6 @@
 package net.englab.contextsearcher.services;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.englab.contextsearcher.models.dto.SubtitleBlock;
 import net.englab.contextsearcher.models.entities.Video;
@@ -23,8 +24,14 @@ public class VideoStorage {
         return videoRepository.save(video).getId();
     }
 
+    @Transactional
     public void deleteById(Long id) {
         videoRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteByVideoId(String id) {
+        videoRepository.deleteByVideoId(id);
     }
 
     public List<Video> findAll() {
