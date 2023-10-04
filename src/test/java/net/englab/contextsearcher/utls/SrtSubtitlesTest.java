@@ -1,11 +1,12 @@
 package net.englab.contextsearcher.utls;
 
+import net.englab.contextsearcher.models.SrtBlock;
+import net.englab.contextsearcher.models.TimeFrame;
 import net.englab.contextsearcher.utils.SrtSubtitles;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static net.englab.contextsearcher.utils.SrtSubtitles.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SrtSubtitlesTest {

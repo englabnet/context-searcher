@@ -5,14 +5,13 @@ import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import net.englab.contextsearcher.models.SrtBlock;
 import net.englab.contextsearcher.models.SrtSentence;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static net.englab.contextsearcher.utils.SrtSubtitles.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SrtSentenceParser {

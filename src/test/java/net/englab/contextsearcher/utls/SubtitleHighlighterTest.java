@@ -1,6 +1,6 @@
 package net.englab.contextsearcher.utls;
 
-import net.englab.contextsearcher.models.SubtitleBlock;
+import net.englab.contextsearcher.models.dto.SubtitleBlock;
 import net.englab.contextsearcher.utils.SubtitleHighlighter;
 import org.junit.jupiter.api.Test;
 

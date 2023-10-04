@@ -2,6 +2,8 @@ package net.englab.contextsearcher.utils;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.englab.contextsearcher.models.SrtBlock;
+import net.englab.contextsearcher.models.TimeFrame;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,7 +16,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 @Slf4j
-public class SrtSubtitles implements Iterable<SrtSubtitles.SrtBlock> {
+public class SrtSubtitles implements Iterable<SrtBlock> {
     private final static Pattern SEPARATOR_PATTERN = Pattern.compile("[\\p{Z}\\s]");
     private final List<SrtBlock> srtBlocks;
 
@@ -87,8 +89,4 @@ public class SrtSubtitles implements Iterable<SrtSubtitles.SrtBlock> {
     public Stream<SrtBlock> stream() {
         return srtBlocks.stream();
     }
-
-    public record SrtBlock(int id, TimeFrame timeFrame, List<String> text) { }
-
-    public record TimeFrame(double startTime, double endTime) {}
 }

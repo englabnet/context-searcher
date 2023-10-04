@@ -1,12 +1,14 @@
 package net.englab.contextsearcher.services;
 
 import lombok.RequiredArgsConstructor;
+import net.englab.contextsearcher.models.dto.SubtitleBlock;
 import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.repositories.VideoRepository;
+import net.englab.contextsearcher.utils.SrtSubtitles;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +31,17 @@ public class VideoStorage {
         return videoRepository.findAll();
     }
 
-    public Optional<Video> findByVideoId(String videoId) {
-        return videoRepository.findByVideoId(videoId);
+    public List<SubtitleBlock> findSubtitlesByVideoId(String videoId) {
+        // TODO: These stream transformations make the search two times slower.
+        //  I can optimise it by making it part of the indexing.
+        return videoRepository.findByVideoId(videoId).stream()
+                .map(Video::getSrt)
+                .map(SrtSubtitles::new)
+                .flatMap(SrtSubtitles::stream)
+                .map(b -> new SubtitleBlock(
+                        b.timeFrame().startTime(),
+                        b.timeFrame().endTime(),
+                        List.of(String.join(" ", b.text())))
+                ).collect(Collectors.toList());
     }
 }

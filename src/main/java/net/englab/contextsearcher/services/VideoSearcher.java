@@ -7,11 +7,9 @@ import com.google.common.collect.TreeRangeMap;
 import lombok.RequiredArgsConstructor;
 import net.englab.contextsearcher.elastic.VideoDocument;
 import net.englab.contextsearcher.models.EnglishVariety;
-import net.englab.contextsearcher.models.SubtitleBlock;
+import net.englab.contextsearcher.models.dto.SubtitleBlock;
 import net.englab.contextsearcher.models.dto.VideoSearchResponse;
 import net.englab.contextsearcher.models.dto.VideoSearchResult;
-import net.englab.contextsearcher.models.entities.Video;
-import net.englab.contextsearcher.utils.SrtSubtitles;
 import net.englab.contextsearcher.utils.SubtitleHighlighter;
 import org.springframework.stereotype.Service;
 
@@ -39,23 +37,15 @@ public class VideoSearcher {
     private VideoSearchResult buildSearchResponse(Hit<VideoDocument> hit) {
         VideoDocument doc = hit.source();
 
-        List<SubtitleBlock> subtitles = videoStorage.findByVideoId(doc.getVideoId()).stream()
-                .map(Video::getSrt)
-                .map(SrtSubtitles::new)
-                .flatMap(SrtSubtitles::stream)
-                .map(b -> new SubtitleBlock(
-                        b.timeFrame().startTime(),
-                        b.timeFrame().endTime(),
-                        List.of(String.join(" ", b.text())))
-                ).collect(Collectors.toList());
+        List<SubtitleBlock> subtitles = videoStorage.findSubtitlesByVideoId(doc.getVideoId());
 
         String highlight = hit.highlight().get("sentence").get(0);
         String[] parts = highlight.split("<em>|</em>");
         RangeMap<Integer, Integer> ranges = mapToRanges(doc.getSubtitleBlocks());
 
-        int startIndex = ranges.get(0);
+        int beginIndex = ranges.get(0);
         int endIndex = ranges.get(doc.getSentence().length() - 1);
-        SubtitleHighlighter.highlight(doc.getSentence(), parts, subtitles.subList(startIndex, endIndex + 1));
+        SubtitleHighlighter.highlight(doc.getSentence(), parts, subtitles.subList(beginIndex, endIndex + 1));
 
         int index = ranges.get(parts[0].length());
         return new VideoSearchResult(doc.getVideoId(), index, subtitles);

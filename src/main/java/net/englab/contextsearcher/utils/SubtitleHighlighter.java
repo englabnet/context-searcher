@@ -2,7 +2,7 @@ package net.englab.contextsearcher.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.englab.contextsearcher.models.SubtitleBlock;
+import net.englab.contextsearcher.models.dto.SubtitleBlock;
 
 import java.util.ArrayList;
 import java.util.List;
