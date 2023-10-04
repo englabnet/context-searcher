@@ -50,7 +50,7 @@ public class VideoIndexer {
         SrtSubtitles subtitles = new SrtSubtitles(srt);
         List<SrtSentence> sentences = SrtSentenceParser.parse(subtitles);
         elasticService.createIndexIfAbsent(VIDEOS_INDEX, Map.of(
-                "video_id", NON_SEARCHABLE_TEXT_PROPERTY,
+                "video_id", KEYWORD_PROPERTY,
                 "sentence", TEXT_PROPERTY,
                 "variety", KEYWORD_PROPERTY,
                 "subtitle_blocks", ObjectProperty.of(b -> b.enabled(false))._toProperty()

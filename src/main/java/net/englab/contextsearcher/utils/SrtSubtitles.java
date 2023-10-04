@@ -1,5 +1,6 @@
 package net.englab.contextsearcher.utils;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
@@ -9,9 +10,12 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 @Slf4j
 public class SrtSubtitles implements Iterable<SrtSubtitles.SrtBlock> {
+    private final static Pattern SEPARATOR_PATTERN = Pattern.compile("[\\p{Z}\\s]");
     private final List<SrtBlock> srtBlocks;
 
     public SrtSubtitles(String srt) {
@@ -23,18 +27,20 @@ public class SrtSubtitles implements Iterable<SrtSubtitles.SrtBlock> {
             List<SrtBlock> result = new ArrayList<>();
 
             String line = srtReader.readLine();
-            while (line != null) {
+            while (line != null && !line.isBlank()) {
                 int id = Integer.parseInt(line);
                 TimeFrame timeFrame = parseTimeFrame(srtReader.readLine());
 
                 List<String> text = new ArrayList<>();
-                line = srtReader.readLine();
-                while (line != null && !line.equals("")) {
+                line = readTextLine(srtReader);
+                while (line != null && !line.isBlank()) {
                     text.add(line);
-                    line = srtReader.readLine();
+                    line = readTextLine(srtReader);
                 }
 
-                result.add(new SrtBlock(id, timeFrame, text));
+                if (!text.isEmpty()) {
+                    result.add(new SrtBlock(id, timeFrame, text));
+                }
 
                 line = srtReader.readLine();
             }
@@ -44,6 +50,15 @@ public class SrtSubtitles implements Iterable<SrtSubtitles.SrtBlock> {
             log.error("Exception occurred while parsing subtitles", e);
             throw new RuntimeException(e);
         }
+    }
+
+    @SneakyThrows
+    private static String readTextLine(BufferedReader srtReader) {
+        String line = srtReader.readLine();
+        if (line != null) {
+            return SEPARATOR_PATTERN.matcher(line).replaceAll(" ").trim();
+        }
+        return null;
     }
 
     private static TimeFrame parseTimeFrame(String line) {
@@ -69,11 +84,8 @@ public class SrtSubtitles implements Iterable<SrtSubtitles.SrtBlock> {
         return srtBlocks.iterator();
     }
 
-    /**
-     * Returns an immutable copy of srt blocks.
-     */
-    public List<SrtBlock> getSrtBlocks() {
-        return List.copyOf(srtBlocks);
+    public Stream<SrtBlock> stream() {
+        return srtBlocks.stream();
     }
 
     public record SrtBlock(int id, TimeFrame timeFrame, List<String> text) { }

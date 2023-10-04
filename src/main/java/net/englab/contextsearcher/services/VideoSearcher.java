@@ -11,7 +11,7 @@ import net.englab.contextsearcher.models.SubtitleBlock;
 import net.englab.contextsearcher.models.dto.VideoSearchResponse;
 import net.englab.contextsearcher.models.dto.VideoSearchResult;
 import net.englab.contextsearcher.models.entities.Video;
-import net.englab.contextsearcher.utils.SrtParser;
+import net.englab.contextsearcher.utils.SrtSubtitles;
 import net.englab.contextsearcher.utils.SubtitleHighlighter;
 import org.springframework.stereotype.Service;
 
@@ -39,10 +39,15 @@ public class VideoSearcher {
     private VideoSearchResult buildSearchResponse(Hit<VideoDocument> hit) {
         VideoDocument doc = hit.source();
 
-        List<SubtitleBlock> subtitles = videoStorage.findByVideoId(doc.getVideoId())
+        List<SubtitleBlock> subtitles = videoStorage.findByVideoId(doc.getVideoId()).stream()
                 .map(Video::getSrt)
-                .map(SrtParser::parseSubtitles)
-                .orElse(null);
+                .map(SrtSubtitles::new)
+                .flatMap(SrtSubtitles::stream)
+                .map(b -> new SubtitleBlock(
+                        b.timeFrame().startTime(),
+                        b.timeFrame().endTime(),
+                        List.of(String.join(" ", b.text())))
+                ).collect(Collectors.toList());
 
         String highlight = hit.highlight().get("sentence").get(0);
         String[] parts = highlight.split("<em>|</em>");
