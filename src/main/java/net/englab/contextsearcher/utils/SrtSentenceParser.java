@@ -17,6 +17,10 @@ import java.util.regex.Pattern;
 public class SrtSentenceParser {
     private final static Pattern SENTENCE_PATTERN = Pattern.compile("[^.!?]+([.!?]|$)");
 
+    public static List<SrtSentence> parse(String srt) {
+        return parse(new SrtSubtitles(srt));
+    }
+
     public static List<SrtSentence> parse(SrtSubtitles subtitles) {
         List<SrtSentence> sentences = new ArrayList<>();
 

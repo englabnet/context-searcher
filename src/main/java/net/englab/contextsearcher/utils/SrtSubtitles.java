@@ -34,10 +34,13 @@ public class SrtSubtitles implements Iterable<SrtBlock> {
                 TimeFrame timeFrame = parseTimeFrame(srtReader.readLine());
 
                 List<String> text = new ArrayList<>();
-                line = readTextLine(srtReader);
-                while (line != null && !line.isBlank()) {
-                    text.add(line);
-                    line = readTextLine(srtReader);
+                line = srtReader.readLine();
+                while (line != null && !line.isEmpty()) {
+                    String parsedText = parseTextLine(line);
+                    if (!parsedText.isBlank()) {
+                        text.add(parsedText);
+                    }
+                    line = srtReader.readLine();
                 }
 
                 if (!text.isEmpty()) {
@@ -55,8 +58,7 @@ public class SrtSubtitles implements Iterable<SrtBlock> {
     }
 
     @SneakyThrows
-    private static String readTextLine(BufferedReader srtReader) {
-        String line = srtReader.readLine();
+    private static String parseTextLine(String line) {
         if (line != null) {
             return SEPARATOR_PATTERN.matcher(line).replaceAll(" ").trim();
         }

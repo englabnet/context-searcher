@@ -72,6 +72,7 @@ public class ElasticService {
     }
 
     public void indexDocuments(String index, Collection<?> docs) {
+        // TODO: a request can't be more than 100 mb
         List<BulkOperation> bulkOperations = docs.stream()
                 .map(doc -> BulkOperation.of(b -> b
                         .create(c -> c

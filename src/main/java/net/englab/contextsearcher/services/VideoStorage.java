@@ -18,7 +18,7 @@ public class VideoStorage {
 
     public Long save(Video video) {
         if (videoRepository.findByVideoId(video.getVideoId()).isPresent()) {
-            throw new RuntimeException("The video has been indexed already!");
+            throw new RuntimeException("The video has been added already!");
         }
         return videoRepository.save(video).getId();
     }

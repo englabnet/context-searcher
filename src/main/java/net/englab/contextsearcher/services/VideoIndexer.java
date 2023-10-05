@@ -6,12 +6,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.englab.contextsearcher.elastic.VideoDocument;
 import net.englab.contextsearcher.models.EnglishVariety;
-import net.englab.contextsearcher.models.SrtSentence;
 import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.utils.SrtSentenceParser;
-import net.englab.contextsearcher.utils.SrtSubtitles;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,10 +28,11 @@ public class VideoIndexer {
     private final ElasticService elasticService;
 
     public void add(String videoId, EnglishVariety variety, String srt, boolean index) {
-        Long id = videoStorage.save(new Video(null, videoId, variety, srt));
+        Video video = new Video(null, videoId, variety, srt);
+        Long id = videoStorage.save(video);
         if (!index) return;
         try {
-            indexVideo(videoId, variety, srt);
+            indexVideos(List.of(video));
         } catch (Exception e) {
             log.error("Exception occurred during video indexing", e);
             videoStorage.deleteById(id);
@@ -54,26 +54,24 @@ public class VideoIndexer {
 
     public void reindexAll() {
         elasticService.removeIndex(VIDEOS_INDEX);
-        videoStorage.findAll().forEach(video ->
-                indexVideo(video.getVideoId(), video.getVariety(), video.getSrt())
-        );
+        indexVideos(videoStorage.findAll());
     }
 
-    private void indexVideo(String videoId, EnglishVariety variety, String srt) {
-        SrtSubtitles subtitles = new SrtSubtitles(srt);
-        List<SrtSentence> sentences = SrtSentenceParser.parse(subtitles);
+    private void indexVideos(Collection<Video> videos) {
         elasticService.createIndexIfAbsent(VIDEOS_INDEX, Map.of(
                 "video_id", KEYWORD_PROPERTY,
                 "sentence", TEXT_PROPERTY,
                 "variety", KEYWORD_PROPERTY,
                 "subtitle_blocks", ObjectProperty.of(b -> b.enabled(false))._toProperty()
         ));
-
-        List<VideoDocument> docs = sentences.stream()
-                .map(sentence -> {
-                    RangeMap<Integer, Integer> ranges = sentence.subtitleBlocks();
-                    return new VideoDocument(videoId, variety.name(), sentence.text(), rangesToMap(ranges));
-                }).toList();
+        List<VideoDocument> docs = videos.stream()
+                .flatMap(video -> SrtSentenceParser.parse(video.getSrt()).stream()
+                        .map(sentence -> new VideoDocument(
+                                video.getVideoId(),
+                                video.getVariety().name(),
+                                sentence.text(),
+                                rangesToMap(sentence.subtitleBlocks())))
+                ).toList();
         elasticService.indexDocuments(VIDEOS_INDEX, docs);
     }
 
