@@ -5,6 +5,7 @@ import co.elastic.clients.elasticsearch._types.mapping.DynamicMapping;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +14,10 @@ import net.englab.contextsearcher.models.EnglishVariety;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -67,15 +71,21 @@ public class ElasticService {
         }
     }
 
-    public void indexDocument(String index, String id, Object value) {
+    public void indexDocuments(String index, Collection<?> docs) {
+        List<BulkOperation> bulkOperations = docs.stream()
+                .map(doc -> BulkOperation.of(b -> b
+                        .create(c -> c
+                                .id(UUID.randomUUID().toString())
+                                .document(doc))
+                        )
+                ).toList();
         try {
-            elasticsearchClient.create(b -> b
+            elasticsearchClient.bulk(b -> b
                     .index(index)
-                    .id(id)
-                    .document(value)
+                    .operations(bulkOperations)
             );
         } catch (IOException e) {
-            log.error("Exception occurred during doc creation", e);
+            log.error("Exception occurred while indexing documents", e);
             throw new RuntimeException(e);
         }
     }

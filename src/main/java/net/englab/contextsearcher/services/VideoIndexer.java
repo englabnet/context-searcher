@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static net.englab.contextsearcher.elastic.ElasticProperties.*;
@@ -70,12 +69,12 @@ public class VideoIndexer {
                 "subtitle_blocks", ObjectProperty.of(b -> b.enabled(false))._toProperty()
         ));
 
-        sentences.forEach(sentence -> {
-            String docId = UUID.randomUUID().toString();
-            RangeMap<Integer, Integer> ranges = sentence.subtitleBlocks(); // todo: use the bulk api
-            var doc = new VideoDocument(videoId, variety.name(), sentence.text(), rangesToMap(ranges));
-            elasticService.indexDocument(VIDEOS_INDEX, docId, doc);
-        });
+        List<VideoDocument> docs = sentences.stream()
+                .map(sentence -> {
+                    RangeMap<Integer, Integer> ranges = sentence.subtitleBlocks();
+                    return new VideoDocument(videoId, variety.name(), sentence.text(), rangesToMap(ranges));
+                }).toList();
+        elasticService.indexDocuments(VIDEOS_INDEX, docs);
     }
 
     public Map<String, Integer> rangesToMap(RangeMap<Integer, Integer> ranges) {

@@ -29,7 +29,7 @@ public class VideoSearcher {
 
         List<VideoSearchResult> videos = searchResponse.hits().hits().stream()
                 .map(this::buildSearchResponse)
-                .collect(Collectors.toList());
+                .toList();
 
         return new VideoSearchResponse(searchResponse.hits().total().value(), videos);
     }

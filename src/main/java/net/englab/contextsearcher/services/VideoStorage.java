@@ -9,7 +9,6 @@ import net.englab.contextsearcher.utils.SrtSubtitles;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +48,6 @@ public class VideoStorage {
                         b.timeFrame().startTime(),
                         b.timeFrame().endTime(),
                         List.of(String.join(" ", b.text())))
-                ).collect(Collectors.toList());
+                ).toList();
     }
 }
