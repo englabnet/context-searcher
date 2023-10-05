@@ -2,7 +2,9 @@ package net.englab.contextsearcher.rest;
 
 import lombok.RequiredArgsConstructor;
 import net.englab.contextsearcher.models.EnglishVariety;
+import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.services.VideoIndexer;
+import net.englab.contextsearcher.services.VideoStorage;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.List;
 public class IndexingController {
 
     private final VideoIndexer videoIndexer;
+    private final VideoStorage videoStorage;
 
     /**
      * Adds the given video.
@@ -58,13 +61,12 @@ public class IndexingController {
     }
 
     /**
-     * Returns the list of indexed video links.
+     * Returns the list of videos we have in the system.
      *
-     * @return a list of links
+     * @return a list of videos
      */
-    @GetMapping("/links")
-    public List<String> links() {
-        // todo: implement
-        return List.of("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+    @GetMapping("/videos")
+    public List<Video> videos() {
+        return videoStorage.findAll();
     }
 }
