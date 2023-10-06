@@ -61,8 +61,8 @@ public class SrtSubtitles implements Iterable<SrtBlock> {
     @SneakyThrows
     private static String parseTextLine(String line) {
         if (line != null) {
-            String text = SEPARATOR_PATTERN.matcher(line).replaceAll(" ").trim();
-            return BRACKETS_PATTERN.matcher(text).replaceAll(" ");
+            String text = SEPARATOR_PATTERN.matcher(line).replaceAll(" ");
+            return BRACKETS_PATTERN.matcher(text).replaceAll("").trim();
         }
         return null;
     }
