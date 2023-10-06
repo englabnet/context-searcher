@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 @Slf4j
 public class SrtSubtitles implements Iterable<SrtBlock> {
+    // This pattern is used to replace any unusual separator characters with spaces
     private final static Pattern SEPARATOR_PATTERN = Pattern.compile("[\\p{Z}\\s]");
 
     // The following pattern is used to remove things like this: [intense music], (noises)
