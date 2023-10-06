@@ -18,6 +18,9 @@ import java.util.stream.Stream;
 @Slf4j
 public class SrtSubtitles implements Iterable<SrtBlock> {
     private final static Pattern SEPARATOR_PATTERN = Pattern.compile("[\\p{Z}\\s]");
+
+    // The following pattern is used to remove things like this: [intense music], (noises)
+    private final static Pattern BRACKETS_PATTERN = Pattern.compile("\\s*(\\[.*?]|\\(.*?\\))");
     private final List<SrtBlock> srtBlocks;
 
     public SrtSubtitles(String srt) {
@@ -58,7 +61,8 @@ public class SrtSubtitles implements Iterable<SrtBlock> {
     @SneakyThrows
     private static String parseTextLine(String line) {
         if (line != null) {
-            return SEPARATOR_PATTERN.matcher(line).replaceAll(" ").trim();
+            String text = SEPARATOR_PATTERN.matcher(line).replaceAll(" ").trim();
+            return BRACKETS_PATTERN.matcher(text).replaceAll(" ");
         }
         return null;
     }
