@@ -53,6 +53,8 @@ public class SrtSentenceParser {
     }
 
     private static List<String> splitIntoSentences(String text) {
+        if (text.isBlank()) return List.of();
+
         List<String> sentences = new ArrayList<>();
 
         // The regular expression below will split sentences while keeping their ending punctuation.
