@@ -20,7 +20,7 @@ public class SubtitleHighlighter {
      */
     public static void highlight(String sentence, String[] parts, List<SubtitleBlock> blocks) {
         String originalText = blocks.stream()
-                .map(block -> block.getText().get(0))
+                .map(block -> block.getText().get(0).trim())
                 .filter(text -> !text.isBlank())
                 .collect(Collectors.joining(" "));
 
