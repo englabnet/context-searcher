@@ -39,15 +39,13 @@ public class SrtSubtitles implements Iterable<SrtBlock> {
 
                 List<String> text = new ArrayList<>();
                 line = srtReader.readLine();
-                while (line != null && !line.isEmpty()) {
+                do {
                     String parsedText = parseTextLine(line);
                     text.add(parsedText);
                     line = srtReader.readLine();
-                }
+                } while (line != null && !line.isEmpty());
 
-                if (!text.isEmpty()) {
-                    result.add(new SrtBlock(id, timeFrame, text));
-                }
+                result.add(new SrtBlock(id, timeFrame, text));
 
                 line = srtReader.readLine();
             }
