@@ -1,18 +1,23 @@
 package net.englab.contextsearcher.services;
 
 import co.elastic.clients.elasticsearch._types.mapping.ObjectProperty;
+import co.elastic.clients.elasticsearch.core.BulkResponse;
 import com.google.common.collect.RangeMap;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.englab.contextsearcher.elastic.VideoDocument;
 import net.englab.contextsearcher.models.EnglishVariety;
+import net.englab.contextsearcher.models.SrtSentence;
 import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.utils.SrtSentenceParser;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static net.englab.contextsearcher.elastic.ElasticProperties.*;
@@ -22,6 +27,7 @@ import static net.englab.contextsearcher.elastic.ElasticProperties.*;
 @RequiredArgsConstructor
 public class VideoIndexer {
 
+    private final static int BULK_SIZE = 10_000;
     private final static String VIDEOS_INDEX = "videos";
 
     private final VideoStorage videoStorage;
@@ -53,10 +59,13 @@ public class VideoIndexer {
     }
 
     public void reindexAll() {
+        log.info("Full reindexing has been started.");
         elasticService.removeIndex(VIDEOS_INDEX);
+        log.info("The old index has been removed.");
         indexVideos(videoStorage.findAll());
     }
 
+    @SneakyThrows
     private void indexVideos(Collection<Video> videos) {
         elasticService.createIndexIfAbsent(VIDEOS_INDEX, Map.of(
                 "video_id", KEYWORD_PROPERTY,
@@ -64,15 +73,39 @@ public class VideoIndexer {
                 "variety", KEYWORD_PROPERTY,
                 "subtitle_blocks", ObjectProperty.of(b -> b.enabled(false))._toProperty()
         ));
-        List<VideoDocument> docs = videos.stream()
-                .flatMap(video -> SrtSentenceParser.parse(video.getSrt()).stream()
-                        .map(sentence -> new VideoDocument(
-                                video.getVideoId(),
-                                video.getVariety().name(),
-                                sentence.text(),
-                                rangesToMap(sentence.subtitleBlocks())))
-                ).toList();
-        elasticService.indexDocuments(VIDEOS_INDEX, docs);
+        List<Future<BulkResponse>> futures = bulkIndex(videos);
+        for (Future<BulkResponse> future : futures) {
+            BulkResponse response = future.get();
+            if (response.errors()) {
+                throw new RuntimeException("Error occurred during video indexing: " + response);
+            } else {
+                log.info("{} videos have been successfully indexed. It took {}ms.", response.items().size(), response.took());
+            }
+        }
+    }
+
+    private List<Future<BulkResponse>> bulkIndex(Collection<Video> videos) {
+        List<VideoDocument> docs = new ArrayList<>();
+        List<Future<BulkResponse>> futures = new ArrayList<>();
+        for (Video video : videos) {
+            List<SrtSentence> sentences = SrtSentenceParser.parse(video.getSrt());
+            for (SrtSentence sentence : sentences) {
+                VideoDocument doc = new VideoDocument(
+                        video.getVideoId(),
+                        video.getVariety().name(),
+                        sentence.text(),
+                        rangesToMap(sentence.subtitleBlocks()));
+                if (docs.size() >= BULK_SIZE) {
+                    futures.add(elasticService.indexDocuments(VIDEOS_INDEX, docs));
+                    docs = new ArrayList<>();
+                }
+                docs.add(doc);
+            }
+        }
+        if (!docs.isEmpty()) {
+            futures.add(elasticService.indexDocuments(VIDEOS_INDEX, docs));
+        }
+        return futures;
     }
 
     public Map<String, Integer> rangesToMap(RangeMap<Integer, Integer> ranges) {
