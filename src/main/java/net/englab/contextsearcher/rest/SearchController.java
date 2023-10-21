@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/searcher")
+@RequestMapping("/api/v1/search")
 public class SearchController {
 
     private final VideoSearcher videoSearcher;
 
-    @GetMapping("/search")
+    @GetMapping
     public VideoSearchResponse search(
             String phrase,
             EnglishVariety variety,
