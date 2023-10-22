@@ -79,7 +79,7 @@ public class VideoIndexer {
             if (response.errors()) {
                 throw new RuntimeException("Error occurred during video indexing: " + response);
             } else {
-                log.info("{} videos have been successfully indexed. It took {}ms.", response.items().size(), response.took());
+                log.info("{} docs have been successfully indexed. It took {}ms.", response.items().size(), response.took());
             }
         }
     }
