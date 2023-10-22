@@ -51,7 +51,7 @@ public class ElasticService {
 
     public void removeIndex(String index) {
         try {
-            elasticsearchClient.indices().delete(d -> d.index(index));
+            elasticsearchClient.indices().delete(d -> d.index(index).ignoreUnavailable(true));
         } catch (IOException e) {
             log.error("Exception occurred during index creation", e);
             throw new RuntimeException(e);
