@@ -20,7 +20,7 @@ public class SearchController {
     public VideoSearchResponse search(
             String phrase,
             EnglishVariety variety,
-            @RequestParam(defaultValue = "0") int from,
+            @RequestParam(defaultValue = "0") int from, // TODO: change it to page
             @RequestParam(defaultValue = "10") int size) {
         return videoSearcher.search(phrase, variety, from, size);
     }

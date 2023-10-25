@@ -5,9 +5,9 @@ import net.englab.contextsearcher.models.EnglishVariety;
 import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.services.VideoIndexer;
 import net.englab.contextsearcher.services.VideoStorage;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -63,10 +63,11 @@ public class IndexingController {
     /**
      * Returns the list of videos we have in the system.
      *
+     * @param pageable pagination and sorting
      * @return a list of videos
      */
     @GetMapping("/videos")
-    public List<Video> videos() {
-        return videoStorage.findAll();
+    public Page<Video> videos(Pageable pageable) {
+        return videoStorage.findAll(pageable);
     }
 }
