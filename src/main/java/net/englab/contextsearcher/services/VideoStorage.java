@@ -2,12 +2,14 @@ package net.englab.contextsearcher.services;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.englab.contextsearcher.models.EnglishVariety;
 import net.englab.contextsearcher.models.dto.SubtitleBlock;
 import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.repositories.VideoRepository;
 import net.englab.contextsearcher.utils.SrtSubtitles;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,8 +41,8 @@ public class VideoStorage {
         return videoRepository.findAll();
     }
 
-    public Page<Video> findAll(Pageable pageable) {
-        return videoRepository.findAll(pageable);
+    public Page<Video> findAll(Specification<Video> specification, Pageable pageable) {
+        return videoRepository.findAll(specification, pageable);
     }
 
     public List<SubtitleBlock> findSubtitlesByVideoId(String videoId) {

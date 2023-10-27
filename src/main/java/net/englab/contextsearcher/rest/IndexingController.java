@@ -7,7 +7,10 @@ import net.englab.contextsearcher.services.VideoIndexer;
 import net.englab.contextsearcher.services.VideoStorage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.bind.annotation.*;
+
+import static net.englab.contextsearcher.models.entities.VideoSpecifications.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -63,11 +66,17 @@ public class IndexingController {
     /**
      * Returns the list of videos we have in the system.
      *
+     * @param id the id
+     * @param videoId the video id
+     * @param variety the english variety
      * @param pageable pagination and sorting
      * @return a list of videos
      */
     @GetMapping("/videos")
-    public Page<Video> videos(Pageable pageable) {
-        return videoStorage.findAll(pageable);
+    public Page<Video> videos(Long id, String videoId, EnglishVariety variety, Pageable pageable) {
+        Specification<Video> specification = byId(id)
+                .and(byVideoId(videoId))
+                .and(byVariety(variety));
+        return videoStorage.findAll(specification, pageable);
     }
 }
