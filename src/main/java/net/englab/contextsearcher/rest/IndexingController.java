@@ -53,13 +53,13 @@ public class IndexingController {
     }
 
     /**
-     * Full reindexing.
+     * Full indexing.
      *
-     * @return the status after reindexing
+     * @return the status after indexing
      */
-    @PostMapping("/reindex")
-    public String reindex() {
-        videoIndexer.reindexAll();
+    @PostMapping("/index")
+    public String index() {
+        videoIndexer.indexAll();
         return "reindex";
     }
 

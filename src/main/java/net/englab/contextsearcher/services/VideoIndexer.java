@@ -58,8 +58,8 @@ public class VideoIndexer {
         videoStorage.deleteByVideoId(videoId);
     }
 
-    public void reindexAll() {
-        log.info("Full reindexing has been started.");
+    public void indexAll() {
+        log.info("Full indexing has been started.");
         elasticService.removeIndex(VIDEOS_INDEX);
         log.info("The old index has been removed.");
         indexVideos(videoStorage.findAll());
