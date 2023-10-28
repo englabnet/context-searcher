@@ -6,4 +6,5 @@ public record VideoSearchResult(
         String videoId,
         Integer index,
         List<SubtitleBlock> subtitles
-) { }
+) {
+}

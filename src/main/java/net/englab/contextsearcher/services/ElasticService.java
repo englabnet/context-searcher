@@ -3,25 +3,25 @@ package net.englab.contextsearcher.services;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.mapping.DynamicMapping;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
+import co.elastic.clients.elasticsearch._types.mapping.TypeMapping;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
-import co.elastic.clients.transport.endpoints.BooleanResponse;
+import co.elastic.clients.elasticsearch.indices.get_mapping.IndexMappingRecord;
+import co.elastic.clients.json.JsonData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.englab.contextsearcher.elastic.VideoDocument;
 import net.englab.contextsearcher.models.EnglishVariety;
+import net.englab.contextsearcher.elastic.IndexMetadata;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 @Slf4j
 @Service
@@ -30,10 +30,20 @@ public class ElasticService {
 
     private final ElasticsearchClient elasticsearchClient;
 
+    public boolean isIndexAbsent(String index) {
+        try {
+            var response = elasticsearchClient.indices()
+                    .exists(b -> b.index(index));
+            return !response.value();
+        } catch (IOException e) {
+            log.error("An exception occurred while checking the existence of an index", e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public void createIndexIfAbsent(String index, Map<String, Property> properties) {
         try {
-            BooleanResponse booleanResponse = elasticsearchClient.indices().exists(b -> b.index(index));
-            if (!booleanResponse.value()) {
+            if (isIndexAbsent(index)) {
                 elasticsearchClient.indices()
                         .create(b -> b
                                 .index(index)
@@ -44,7 +54,7 @@ public class ElasticService {
                         );
             }
         } catch (IOException e) {
-            log.error("Exception occurred during index creation", e);
+            log.error("An exception occurred during index creation", e);
             throw new RuntimeException(e);
         }
     }
@@ -53,7 +63,40 @@ public class ElasticService {
         try {
             elasticsearchClient.indices().delete(d -> d.index(index).ignoreUnavailable(true));
         } catch (IOException e) {
-            log.error("Exception occurred during index creation", e);
+            log.error("An exception occurred during index creation", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Optional<IndexMetadata> getIndexMetadata(String index) {
+        try {
+            if (isIndexAbsent(index)) return Optional.empty();
+            var response = elasticsearchClient.indices()
+                    .getMapping(m -> m.index(index));
+            return Optional.of(response)
+                    .map(r -> r.get(index))
+                    .map(IndexMappingRecord::mappings)
+                    .map(TypeMapping::meta)
+                    .filter(meta -> meta.containsKey("startTime") && meta.containsKey("finishTime"))
+                    .map(meta -> new IndexMetadata(
+                            meta.get("startTime").to(Instant.class),
+                            meta.get("finishTime").to(Instant.class)
+                    ));
+        } catch (IOException e) {
+            log.error("An exception occurred while getting metadata", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void setIndexMetadata(String index, IndexMetadata metadata) {
+        try {
+            elasticsearchClient.indices().putMapping(m -> m
+                    .index(index)
+                    .meta("startTime", JsonData.of(metadata.startTime()))
+                    .meta("finishTime", JsonData.of(metadata.finishTime()))
+            );
+        } catch (IOException e) {
+            log.error("An exception occurred while setting metadata", e);
             throw new RuntimeException(e);
         }
     }
@@ -70,13 +113,13 @@ public class ElasticService {
                     )
             );
         } catch (IOException e) {
-            log.error("Exception occurred during video removal", e);
+            log.error("An exception occurred during video removal", e);
             throw new RuntimeException(e);
         }
     }
 
     @Async
-    public Future<BulkResponse> indexDocuments(String index, Collection<?> docs) {
+    public CompletableFuture<BulkResponse> indexDocuments(String index, Collection<?> docs) {
         List<BulkOperation> bulkOperations = docs.stream()
                 .map(doc -> BulkOperation.of(b -> b
                         .create(c -> c
@@ -91,7 +134,7 @@ public class ElasticService {
             );
             return CompletableFuture.completedFuture(response);
         } catch (IOException e) {
-            log.error("Exception occurred while indexing documents", e);
+            log.error("An exception occurred while indexing documents", e);
             throw new RuntimeException(e);
         }
     }
@@ -109,7 +152,7 @@ public class ElasticService {
                             )
                     ), VideoDocument.class);
         } catch (IOException e) {
-            log.error("Exception occurred during doc search", e);
+            log.error("An exception occurred during doc search", e);
             throw new RuntimeException(e);
         }
     }
