@@ -19,10 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -117,7 +114,7 @@ public class VideoIndexer {
                     HttpStatus.CONFLICT,
                     "A new indexing job cannot be started if one is already running"
             );
-        };
+        }
         indexingInfo = IndexingInfo.started(Instant.now());
         executor.execute(() -> {
             try {
@@ -142,14 +139,19 @@ public class VideoIndexer {
     @SneakyThrows
     private void indexVideos(Collection<Video> videos) {
         Instant startTime = Instant.now();
-        elasticService.createIndexIfAbsent(VIDEOS_INDEX, Map.of(
+
+        Optional<String> oldIndexName = elasticService.getIndexName(VIDEOS_INDEX);
+
+        String indexName = generateIndexName(VIDEOS_INDEX);
+        elasticService.createIndex(indexName, Map.of(
                 "video_id", KEYWORD_PROPERTY,
                 "sentence", TEXT_PROPERTY,
                 "variety", KEYWORD_PROPERTY,
                 "subtitle_blocks", ObjectProperty.of(b -> b.enabled(false))._toProperty()
         ));
-        log.info("A new index has been created.");
-        List<Future<BulkResponse>> futures = bulkIndex(videos);
+        log.info("A new index '{}' has been created.", indexName);
+
+        List<Future<BulkResponse>> futures = bulkIndex(indexName, videos);
         for (Future<BulkResponse> future : futures) {
             BulkResponse response = future.get();
             if (response.errors()) {
@@ -158,11 +160,23 @@ public class VideoIndexer {
                 log.info("{} docs have been successfully indexed. It took {}ms.", response.items().size(), response.took());
             }
         }
-        elasticService.setIndexMetadata(VIDEOS_INDEX, new IndexMetadata(startTime, Instant.now()));
+
+        elasticService.setIndexMetadata(indexName, new IndexMetadata(startTime, Instant.now()));
         log.info("The index metadata has been updated.");
+
+        elasticService.putAlias(indexName, VIDEOS_INDEX);
+        log.info("The alias has been updated.");
+
+        oldIndexName.ifPresent(elasticService::removeIndex);
+        log.info("The old index has been removed.");
     }
 
-    private List<Future<BulkResponse>> bulkIndex(Collection<Video> videos) {
+    private static String generateIndexName(String index) {
+        return index + "_" + Instant.now().toEpochMilli();
+    }
+
+    // TODO: put it in a separate class
+    private List<Future<BulkResponse>> bulkIndex(String index, Collection<Video> videos) {
         List<VideoDocument> docs = new ArrayList<>();
         List<Future<BulkResponse>> futures = new ArrayList<>();
         for (Video video : videos) {
@@ -174,14 +188,14 @@ public class VideoIndexer {
                         sentence.text(),
                         rangesToMap(sentence.subtitleBlocks()));
                 if (docs.size() >= BULK_SIZE) {
-                    futures.add(elasticService.indexDocuments(VIDEOS_INDEX, docs));
+                    futures.add(elasticService.indexDocuments(index, docs));
                     docs = new ArrayList<>();
                 }
                 docs.add(doc);
             }
         }
         if (!docs.isEmpty()) {
-            futures.add(elasticService.indexDocuments(VIDEOS_INDEX, docs));
+            futures.add(elasticService.indexDocuments(index, docs));
         }
         return futures;
     }
