@@ -47,20 +47,24 @@ public class VideoIndexer {
      * @param videoId   the video id
      * @param variety   the variety of English used in the video
      * @param srt       the subtitles for the video in SRT format
-     * @param index     true if we also want to index the video
      */
-    public void add(String videoId, EnglishVariety variety, String srt, boolean index) {
-        if (index && isRunning.get()) {
+    public void add(String videoId, EnglishVariety variety, String srt) {
+        if (isRunning.get()) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "A video cannot be indexed while an indexing job is running"
             );
         }
+        if (videoStorage.findByVideoId(videoId).isPresent()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "The video has been added already!"
+            );
+        }
         Video video = new Video(null, videoId, variety, srt);
         Long id = videoStorage.save(video);
-        if (!index) return;
         try {
-            indexVideos(List.of(video));
+            indexVideos(VIDEOS_INDEX, List.of(video));
         } catch (Exception e) {
             log.error("Exception occurred during video indexing", e);
             videoStorage.deleteById(id);
@@ -69,27 +73,56 @@ public class VideoIndexer {
     }
 
     /**
-     * Removes the given video.
+     * Updates the specified video.
      *
+     * @param id        the id
      * @param videoId   the video id
-     * @param index     true if we also want to remove the video from the index
+     * @param variety   the variety of English used in the video
+     * @param srt       the subtitles for the video in SRT format
      */
-    public void remove(String videoId, boolean index) {
-        if (index) {
-            if (isRunning.get()) {
-                throw new ResponseStatusException(
-                        HttpStatus.CONFLICT,
-                        "A video cannot be removed from the index while an indexing job is running"
-                );
-            }
+    public void update(Long id, String videoId, EnglishVariety variety, String srt) {
+        if (isRunning.get()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "A video cannot be updated while an indexing job is running"
+            );
+        }
+        videoStorage.findById(id).ifPresent(video -> {
+            video.setVideoId(videoId);
+            video.setVariety(variety);
+            video.setSrt(srt);
+            videoStorage.save(video);
+            elasticService.removeVideo(VIDEOS_INDEX, video.getVideoId());
             try {
-                elasticService.removeVideo(VIDEOS_INDEX, videoId);
+                indexVideos(VIDEOS_INDEX, List.of(video));
             } catch (Exception e) {
-                log.error("Exception occurred during video removal", e);
+                log.error("Exception occurred during video updating", e);
+                videoStorage.deleteById(id);
                 throw new RuntimeException(e);
             }
+        });
+    }
+
+    /**
+     * Removes a video by the specified id.
+     *
+     * @param id the id
+     */
+    public void remove(Long id) {
+        if (isRunning.get()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "A video cannot be removed from the index while an indexing job is running"
+            );
         }
-        videoStorage.deleteByVideoId(videoId);
+        try {
+            videoStorage.findById(id).ifPresent(video ->
+                    elasticService.removeVideo(VIDEOS_INDEX, video.getVideoId()));
+        } catch (Exception e) {
+            log.error("Exception occurred during video removal", e);
+            throw new RuntimeException(e);
+        }
+        videoStorage.deleteById(id);
     }
 
     /**
@@ -124,7 +157,7 @@ public class VideoIndexer {
                 log.info("Start reading videos from the database...");
                 List<Video> videos = videoStorage.findAll();
                 log.info("Start indexing the videos...");
-                indexVideos(videos);
+                startFullIndexing(videos);
                 log.info("Indexing has been finished successfully.");
             } catch (Throwable throwable) {
                 indexingInfo = IndexingInfo.failed(indexingInfo.startTime(), Instant.now(), throwable.getMessage());
@@ -137,7 +170,7 @@ public class VideoIndexer {
     }
 
     @SneakyThrows
-    private void indexVideos(Collection<Video> videos) {
+    private void startFullIndexing(Collection<Video> videos) {
         Instant startTime = Instant.now();
 
         Optional<String> oldIndexName = elasticService.getIndexName(VIDEOS_INDEX);
@@ -151,15 +184,7 @@ public class VideoIndexer {
         ));
         log.info("A new index '{}' has been created.", indexName);
 
-        List<Future<BulkResponse>> futures = bulkIndex(indexName, videos);
-        for (Future<BulkResponse> future : futures) {
-            BulkResponse response = future.get();
-            if (response.errors()) {
-                throw new RuntimeException("Error occurred during video indexing: " + response);
-            } else {
-                log.info("{} docs have been successfully indexed. It took {}ms.", response.items().size(), response.took());
-            }
-        }
+        indexVideos(indexName, videos);
 
         elasticService.setIndexMetadata(indexName, new IndexMetadata(startTime, Instant.now()));
         log.info("The index metadata has been updated.");
@@ -169,6 +194,19 @@ public class VideoIndexer {
 
         oldIndexName.ifPresent(elasticService::removeIndex);
         log.info("The old index has been removed.");
+    }
+
+    @SneakyThrows
+    private void indexVideos(String indexName, Collection<Video> videos) {
+        List<Future<BulkResponse>> futures = bulkIndex(indexName, videos);
+        for (Future<BulkResponse> future : futures) {
+            BulkResponse response = future.get();
+            if (response.errors()) {
+                throw new RuntimeException("Error occurred during video indexing: " + response);
+            } else {
+                log.info("{} docs have been successfully indexed. It took {} ms.", response.items().size(), response.took());
+            }
+        }
     }
 
     private static String generateIndexName(String index) {

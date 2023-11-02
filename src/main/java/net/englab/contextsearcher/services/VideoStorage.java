@@ -2,7 +2,6 @@ package net.englab.contextsearcher.services;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import net.englab.contextsearcher.models.EnglishVariety;
 import net.englab.contextsearcher.models.dto.SubtitleBlock;
 import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.repositories.VideoRepository;
@@ -13,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,20 +21,20 @@ public class VideoStorage {
     private final VideoRepository videoRepository;
 
     public Long save(Video video) {
-        if (videoRepository.findByVideoId(video.getVideoId()).isPresent()) {
-            throw new RuntimeException("The video has been added already!");
-        }
         return videoRepository.save(video).getId();
+    }
+
+    public Optional<Video> findById(Long id) {
+        return videoRepository.findById(id);
+    }
+
+    public Optional<Video> findByVideoId(String videoId) {
+        return videoRepository.findByVideoId(videoId);
     }
 
     @Transactional
     public void deleteById(Long id) {
         videoRepository.deleteById(id);
-    }
-
-    @Transactional
-    public void deleteByVideoId(String id) {
-        videoRepository.deleteByVideoId(id);
     }
 
     public List<Video> findAll() {
