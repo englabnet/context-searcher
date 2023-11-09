@@ -32,9 +32,12 @@ public class SubtitleHighlighter {
         int p = 0;
         int endIndex = offset + parts[p].length();
         for (SubtitleBlock block : blocks) {
+            String line = block.getText().get(0);
+
+            // we want to skip any empty lines as they break highlighting
+            if (line.isEmpty()) continue;
 
             // skip lines until we don't find the one where the text is highlighted
-            String line = block.getText().get(0);
             if (endIndex >= line.length()) {
                 endIndex -= line.length() + 1; // length + a space character
                 continue;

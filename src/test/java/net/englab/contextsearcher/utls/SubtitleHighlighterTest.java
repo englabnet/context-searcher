@@ -44,4 +44,35 @@ class SubtitleHighlighterTest {
 
         assertEquals(expectedBlocks, blocks);
     }
+
+    @Test
+    void emptyBlockTest() {
+        String sentence = "'I say chaps last one to arrive in Manchester has to telephone the Queen and a blow raspberry' " +
+                "But little did Claude Grahame White know that his expensive hobby things were soon to become a major military importance.";
+        String[] parts = {
+                "'I say chaps last one to arrive in Manchester has to telephone the Queen and a blow raspberry' But ",
+                "little",
+                " ",
+                "did",
+                " Claude Grahame White know that his expensive hobby things were soon to become a major military importance."
+        };
+        List<SubtitleBlock> blocks = List.of(
+                new SubtitleBlock(0.0, 0.0, List.of("'I say chaps last one to arrive in Manchester has to telephone the Queen and a blow raspberry'")),
+                new SubtitleBlock(0.0, 0.0, List.of("")),
+                new SubtitleBlock(0.0, 0.0, List.of("But little did Claude Grahame White know that his expensive hobby things")),
+                new SubtitleBlock(0.0, 0.0, List.of("were soon to become a major military importance."))
+        );
+
+
+        SubtitleHighlighter.highlight(sentence, parts, blocks);
+
+        List<SubtitleBlock> expectedBlocks = List.of(
+                new SubtitleBlock(0.0, 0.0, List.of("'I say chaps last one to arrive in Manchester has to telephone the Queen and a blow raspberry'")),
+                new SubtitleBlock(0.0, 0.0, List.of("")),
+                new SubtitleBlock(0.0, 0.0, List.of("But ", "little", " ", "did", " Claude Grahame White know that his expensive hobby things")),
+                new SubtitleBlock(0.0, 0.0, List.of("were soon to become a major military importance."))
+        );
+
+        assertEquals(expectedBlocks, blocks);
+    }
 }
