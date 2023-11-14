@@ -1,4 +1,4 @@
-package net.englab.contextsearcher.models.dto;
+package net.englab.contextsearcher.models.subtitles;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

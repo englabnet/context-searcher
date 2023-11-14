@@ -1,15 +1,13 @@
-package net.englab.contextsearcher.utls;
+package net.englab.contextsearcher.subtitles;
 
-import net.englab.contextsearcher.models.SrtSentence;
-import net.englab.contextsearcher.utils.SrtSentenceParser;
-import net.englab.contextsearcher.utils.SrtSubtitles;
+import net.englab.contextsearcher.models.subtitles.SubtitleSentence;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SrtSentenceParserTest {
+class SubtitleSentenceExtractorTest {
 
     @Test
     void testLongSentence() {
@@ -35,12 +33,10 @@ class SrtSentenceParserTest {
                 that’s what you’re talking about.
                 """;
 
-        SrtSubtitles subtitles = new SrtSubtitles(text);
-
-        List<SrtSentence> sentences = SrtSentenceParser.parse(subtitles);
+        List<SubtitleSentence> sentences = SubtitleSentenceExtractor.extract(text);
 
         assertEquals(1, sentences.size());
-        SrtSentence sentence = sentences.get(0);
+        SubtitleSentence sentence = sentences.get(0);
         String expectedText = "The most common words that languages borrow from each other are nouns, words for things, " +
                 "probably since it's fairly straightforward to point at an object, say the word for it, and have the other " +
                 "person understand that’s what you’re talking about.";
@@ -68,12 +64,10 @@ class SrtSentenceParserTest {
                 that will catch bugs!
                 """;
 
-        SrtSubtitles subtitles = new SrtSubtitles(text);
-
-        List<SrtSentence> sentences = SrtSentenceParser.parse(subtitles);
+        List<SubtitleSentence> sentences = SubtitleSentenceExtractor.extract(text);
 
         assertEquals(4, sentences.size());
-        SrtSentence sentence = sentences.get(0);
+        SubtitleSentence sentence = sentences.get(0);
         assertEquals("Hello world!", sentence.text());
         assertEquals(0, sentence.subtitleBlocks().get(0));
         assertEquals(0, sentence.subtitleBlocks().get(11));
@@ -112,12 +106,10 @@ class SrtSentenceParserTest {
                 Matcha tea is "powdered tea tea".
                 """;
 
-        SrtSubtitles subtitles = new SrtSubtitles(text);
-
-        List<SrtSentence> sentences = SrtSentenceParser.parse(subtitles);
+        List<SubtitleSentence> sentences = SubtitleSentenceExtractor.extract(text);
 
         assertEquals(4, sentences.size());
-        SrtSentence sentence = sentences.get(0);
+        SubtitleSentence sentence = sentences.get(0);
         String expectedText = "The Arabic word /sˤaħ raːʔ/ for \"deserts\" became " +
                 "the English word specifically for the Sahara Desert.";
         assertEquals(expectedText, sentence.text());

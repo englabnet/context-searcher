@@ -1,12 +1,12 @@
-package net.englab.contextsearcher.utils;
+package net.englab.contextsearcher.subtitles;
 
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.englab.contextsearcher.models.SrtBlock;
-import net.englab.contextsearcher.models.SrtSentence;
+import net.englab.contextsearcher.models.subtitles.SrtBlock;
+import net.englab.contextsearcher.models.subtitles.SubtitleSentence;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,15 +14,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class SrtSentenceParser {
+public class SubtitleSentenceExtractor {
     private final static Pattern SENTENCE_PATTERN = Pattern.compile("[^.!?]+([.!?]|$)");
 
-    public static List<SrtSentence> parse(String srt) {
-        return parse(new SrtSubtitles(srt));
+    public static List<SubtitleSentence> extract(String srt) {
+        return extract(new SrtSubtitles(srt));
     }
 
-    public static List<SrtSentence> parse(SrtSubtitles subtitles) {
-        List<SrtSentence> sentences = new ArrayList<>();
+    private static List<SubtitleSentence> extract(SrtSubtitles subtitles) {
+        List<SubtitleSentence> sentences = new ArrayList<>();
 
         RangeMap<Integer, Integer> ranges = TreeRangeMap.create();
         StringBuilder sentenceBuilder = new StringBuilder();
@@ -41,7 +41,7 @@ public class SrtSentenceParser {
                 ranges.put(Range.closed(startPoint, sentenceBuilder.length() - 1), blockIndex);
 
                 if (i < parts.size() - 1) {
-                    sentences.add(new SrtSentence(ranges, sentenceBuilder.toString()));
+                    sentences.add(new SubtitleSentence(ranges, sentenceBuilder.toString()));
 
                     sentenceBuilder = new StringBuilder();
                     ranges = TreeRangeMap.create();

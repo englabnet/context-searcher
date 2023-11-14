@@ -10,9 +10,9 @@ import net.englab.contextsearcher.elastic.VideoDocument;
 import net.englab.contextsearcher.models.EnglishVariety;
 import net.englab.contextsearcher.elastic.IndexMetadata;
 import net.englab.contextsearcher.models.IndexingInfo;
-import net.englab.contextsearcher.models.SrtSentence;
+import net.englab.contextsearcher.models.subtitles.SubtitleSentence;
 import net.englab.contextsearcher.models.entities.Video;
-import net.englab.contextsearcher.utils.SrtSentenceParser;
+import net.englab.contextsearcher.subtitles.SubtitleSentenceExtractor;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -213,13 +213,13 @@ public class VideoIndexer {
         return index + "_" + Instant.now().toEpochMilli();
     }
 
-    // TODO: put it in a separate class
+    // TODO: should I put it in a separate class?
     private List<Future<BulkResponse>> bulkIndex(String index, Collection<Video> videos) {
         List<VideoDocument> docs = new ArrayList<>();
         List<Future<BulkResponse>> futures = new ArrayList<>();
         for (Video video : videos) {
-            List<SrtSentence> sentences = SrtSentenceParser.parse(video.getSrt());
-            for (SrtSentence sentence : sentences) {
+            List<SubtitleSentence> sentences = SubtitleSentenceExtractor.extract(video.getSrt());
+            for (SubtitleSentence sentence : sentences) {
                 VideoDocument doc = new VideoDocument(
                         video.getVideoId(),
                         video.getVariety().name(),

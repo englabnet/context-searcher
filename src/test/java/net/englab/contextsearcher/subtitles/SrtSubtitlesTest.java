@@ -1,8 +1,7 @@
-package net.englab.contextsearcher.utls;
+package net.englab.contextsearcher.subtitles;
 
-import net.englab.contextsearcher.models.SrtBlock;
-import net.englab.contextsearcher.models.TimeFrame;
-import net.englab.contextsearcher.utils.SrtSubtitles;
+import net.englab.contextsearcher.models.subtitles.SrtBlock;
+import net.englab.contextsearcher.models.subtitles.TimeFrame;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

@@ -2,10 +2,10 @@ package net.englab.contextsearcher.services;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import net.englab.contextsearcher.models.dto.SubtitleBlock;
+import net.englab.contextsearcher.models.subtitles.SubtitleBlock;
 import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.repositories.VideoRepository;
-import net.englab.contextsearcher.utils.SrtSubtitles;
+import net.englab.contextsearcher.subtitles.SrtSubtitles;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;

@@ -7,10 +7,10 @@ import com.google.common.collect.TreeRangeMap;
 import lombok.RequiredArgsConstructor;
 import net.englab.contextsearcher.elastic.VideoDocument;
 import net.englab.contextsearcher.models.EnglishVariety;
-import net.englab.contextsearcher.models.dto.SubtitleBlock;
+import net.englab.contextsearcher.models.subtitles.SubtitleBlock;
 import net.englab.contextsearcher.models.dto.VideoSearchResponse;
 import net.englab.contextsearcher.models.dto.VideoSearchResult;
-import net.englab.contextsearcher.utils.SubtitleHighlighter;
+import net.englab.contextsearcher.subtitles.SubtitleHighlighter;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

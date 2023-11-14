@@ -1,8 +1,8 @@
-package net.englab.contextsearcher.utils;
+package net.englab.contextsearcher.subtitles;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.englab.contextsearcher.models.dto.SubtitleBlock;
+import net.englab.contextsearcher.models.subtitles.SubtitleBlock;
 
 import java.util.ArrayList;
 import java.util.List;

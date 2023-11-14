@@ -1,9 +1,9 @@
-package net.englab.contextsearcher.utils;
+package net.englab.contextsearcher.subtitles;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import net.englab.contextsearcher.models.SrtBlock;
-import net.englab.contextsearcher.models.TimeFrame;
+import net.englab.contextsearcher.models.subtitles.SrtBlock;
+import net.englab.contextsearcher.models.subtitles.TimeFrame;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -61,6 +61,7 @@ public class SrtSubtitles implements Iterable<SrtBlock> {
     private static String parseTextLine(String line) {
         if (line != null) {
             String text = SEPARATOR_PATTERN.matcher(line).replaceAll(" ");
+            // TODO: should this class be responsible for this?
             return BRACKETS_PATTERN.matcher(text).replaceAll("").trim();
         }
         return null;
