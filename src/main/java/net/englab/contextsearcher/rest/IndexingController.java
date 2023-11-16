@@ -21,7 +21,7 @@ public class IndexingController {
     /**
      * Starts a new indexing job.
      *
-     * @return the status after starting an indexing job
+     * @return a status message after starting an indexing job
      */
     @PostMapping("/index")
     public String index() {
@@ -36,7 +36,7 @@ public class IndexingController {
     /**
      * Retrieves the current indexing status.
      *
-     * @return the current indexing status
+     * @return an indexing status
      */
     @GetMapping("/status")
     public IndexingInfo getStatus() {
