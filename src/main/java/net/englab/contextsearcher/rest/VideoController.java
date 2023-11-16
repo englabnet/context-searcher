@@ -1,6 +1,9 @@
 package net.englab.contextsearcher.rest;
 
 import lombok.RequiredArgsConstructor;
+import net.englab.contextsearcher.exceptions.IndexingConflictException;
+import net.englab.contextsearcher.exceptions.VideoAlreadyExistsException;
+import net.englab.contextsearcher.exceptions.VideoNotFoundException;
 import net.englab.contextsearcher.models.EnglishVariety;
 import net.englab.contextsearcher.models.dto.VideoDto;
 import net.englab.contextsearcher.models.entities.Video;
@@ -9,10 +12,15 @@ import net.englab.contextsearcher.services.VideoStorage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import static net.englab.contextsearcher.models.entities.VideoSpecifications.*;
 
+/**
+ * A rest controller that handles all the operations related to videos: getting, adding, modifying, removing.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/videos")
@@ -22,12 +30,12 @@ public class VideoController {
     private final VideoStorage videoStorage;
 
     /**
-     * Returns the list of videos we have in the system.
+     * Returns the list of videos that we have in the system.
      *
-     * @param id the id
-     * @param videoId the video id
-     * @param variety the english variety
-     * @param pageable pagination and sorting
+     * @param id        filter by id
+     * @param videoId   filter by video id
+     * @param variety   filter by variety of English
+     * @param pageable  pagination and sorting
      * @return a list of videos
      */
     @GetMapping
@@ -39,38 +47,55 @@ public class VideoController {
     }
 
     /**
-     * Adds the given video.
+     * Adds a new video.
      *
-     * @param video the video to add
-     * @return the status after adding
+     * @param video the video that needs to be added
+     * @return a status message after adding the video
      */
     @PostMapping
     public String add(@RequestBody VideoDto video) {
-        videoIndexer.add(video.videoId(), video.variety(), video.srt());
-        return "The video has been added";
+        try {
+            videoIndexer.add(video.videoId(), video.variety(), video.srt());
+            return "The video has been added";
+        } catch (IndexingConflictException | VideoAlreadyExistsException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
     }
 
     /**
      * Updates the given video.
      *
-     * @param video the video to update
-     * @return the status after adding
+     * @param id    the id of the video that needs to be updated
+     * @param video the modified video data
+     * @return a status message after updating the video
      */
     @PutMapping("/{id}")
     public String update(@PathVariable Long id, @RequestBody VideoDto video) {
-        videoIndexer.update(id, video.videoId(), video.variety(), video.srt());
-        return "The video has been updated";
+        try {
+            videoIndexer.update(id, video.videoId(), video.variety(), video.srt());
+            return "The video has been updated";
+        } catch (IndexingConflictException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        } catch (VideoNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
     /**
      * Removes a video by the specified id.
      *
-     * @param id        the id
-     * @return the status after removing
+     * @param id the id of the video that needs to be removed
+     * @return a status message after removing the video
      */
     @DeleteMapping("/{id}")
     public String remove(@PathVariable Long id) {
-        videoIndexer.remove(id);
-        return "The video has been removed";
+        try {
+            videoIndexer.remove(id);
+            return "The video has been removed";
+        } catch (IndexingConflictException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        } catch (VideoNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 }

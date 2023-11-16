@@ -7,16 +7,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.englab.contextsearcher.elastic.VideoDocument;
+import net.englab.contextsearcher.exceptions.IndexingConflictException;
+import net.englab.contextsearcher.exceptions.VideoAlreadyExistsException;
+import net.englab.contextsearcher.exceptions.VideoNotFoundException;
 import net.englab.contextsearcher.models.EnglishVariety;
 import net.englab.contextsearcher.elastic.IndexMetadata;
 import net.englab.contextsearcher.models.IndexingInfo;
 import net.englab.contextsearcher.models.subtitles.SubtitleSentence;
 import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.subtitles.SubtitleSentenceExtractor;
-import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.*;
@@ -47,20 +48,16 @@ public class VideoIndexer {
      * @param videoId   the video id
      * @param variety   the variety of English used in the video
      * @param srt       the subtitles for the video in SRT format
+     * @throws IndexingConflictException if an indexing job is running
+     * @throws VideoAlreadyExistsException if the video already exists
      */
     public void add(String videoId, EnglishVariety variety, String srt) {
         if (isRunning.get()) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "A video cannot be indexed while an indexing job is running"
-            );
+            throw new IndexingConflictException("A video cannot be indexed while an indexing job is running");
         }
-        if (videoStorage.findByVideoId(videoId).isPresent()) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "The video has been added already!"
-            );
-        }
+        videoStorage.findByVideoId(videoId).ifPresent(video -> {
+            throw new VideoAlreadyExistsException("The video already exists.");
+        });
         Video video = new Video(null, videoId, variety, srt);
         Long id = videoStorage.save(video);
         try {
@@ -79,15 +76,14 @@ public class VideoIndexer {
      * @param videoId   the video id
      * @param variety   the variety of English used in the video
      * @param srt       the subtitles for the video in SRT format
+     * @throws IndexingConflictException if an indexing job is running
+     * @throws VideoNotFoundException if the video is not found
      */
     public void update(Long id, String videoId, EnglishVariety variety, String srt) {
         if (isRunning.get()) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "A video cannot be updated while an indexing job is running"
-            );
+            throw new IndexingConflictException("A video cannot be updated while an indexing job is running");
         }
-        videoStorage.findById(id).ifPresent(video -> {
+        videoStorage.findById(id).ifPresentOrElse(video -> {
             video.setVideoId(videoId);
             video.setVariety(variety);
             video.setSrt(srt);
@@ -100,6 +96,8 @@ public class VideoIndexer {
                 videoStorage.deleteById(id);
                 throw new RuntimeException(e);
             }
+        }, () -> {
+            throw new VideoNotFoundException("The video has not been found and cannot be modified.");
         });
     }
 
@@ -107,17 +105,19 @@ public class VideoIndexer {
      * Removes a video by the specified id.
      *
      * @param id the id
+     * @throws IndexingConflictException if an indexing job is running
+     * @throws VideoNotFoundException if the video is not found
      */
     public void remove(Long id) {
         if (isRunning.get()) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "A video cannot be removed from the index while an indexing job is running"
-            );
+            throw new IndexingConflictException("A video cannot be removed while an indexing job is running");
         }
         try {
-            videoStorage.findById(id).ifPresent(video ->
-                    elasticService.removeVideo(VIDEOS_INDEX, video.getVideoId()));
+            videoStorage.findById(id).ifPresentOrElse(video ->
+                    elasticService.removeVideo(VIDEOS_INDEX, video.getVideoId()),
+            () -> {
+                throw new VideoNotFoundException("The video has not been found and cannot be removed.");
+            });
         } catch (Exception e) {
             log.error("Exception occurred during video removal", e);
             throw new RuntimeException(e);
@@ -140,13 +140,12 @@ public class VideoIndexer {
 
     /**
      * Starts a new indexing job.
+     *
+     * @throws IndexingConflictException if an indexing job has been already started
      */
     public void startIndexing() {
         if (isRunning.getAndSet(true)) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "A new indexing job cannot be started if one is already running"
-            );
+            throw new IndexingConflictException("A new indexing job cannot be started if one is already running");
         }
         indexingInfo = IndexingInfo.started(Instant.now());
         executor.execute(() -> {
@@ -175,7 +174,7 @@ public class VideoIndexer {
 
         Optional<String> oldIndexName = elasticService.getIndexName(VIDEOS_INDEX);
 
-        String indexName = generateIndexName(VIDEOS_INDEX);
+        String indexName = generateVideoIndexName();
         elasticService.createIndex(indexName, Map.of(
                 "video_id", KEYWORD_PROPERTY,
                 "sentence", TEXT_PROPERTY,
@@ -209,11 +208,10 @@ public class VideoIndexer {
         }
     }
 
-    private static String generateIndexName(String index) {
-        return index + "_" + Instant.now().toEpochMilli();
+    private static String generateVideoIndexName() {
+        return VIDEOS_INDEX + "_" + Instant.now().toEpochMilli();
     }
 
-    // TODO: should I put it in a separate class?
     private List<Future<BulkResponse>> bulkIndex(String index, Collection<Video> videos) {
         List<VideoDocument> docs = new ArrayList<>();
         List<Future<BulkResponse>> futures = new ArrayList<>();
