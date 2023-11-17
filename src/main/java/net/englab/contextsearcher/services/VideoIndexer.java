@@ -27,6 +27,10 @@ import java.util.stream.Collectors;
 
 import static net.englab.contextsearcher.elastic.ElasticProperties.*;
 
+/**
+ * A video indexer service that allows us to index, update, and remove videos one-by-one
+ * as well as reindex the full dataset entirely by starting an indexing job.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
