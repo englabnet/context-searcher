@@ -6,10 +6,11 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+// TODO: turn it into a record
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SubtitleBlock {
+public class SubtitleEntry {
     private double startTime;
     private double endTime;
     private List<String> text;

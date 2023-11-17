@@ -2,7 +2,7 @@ package net.englab.contextsearcher.services;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import net.englab.contextsearcher.models.subtitles.SubtitleBlock;
+import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
 import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.repositories.VideoRepository;
 import net.englab.contextsearcher.subtitles.SrtSubtitles;
@@ -45,14 +45,14 @@ public class VideoStorage {
         return videoRepository.findAll(specification, pageable);
     }
 
-    public List<SubtitleBlock> findSubtitlesByVideoId(String videoId) {
+    public List<SubtitleEntry> findSubtitlesByVideoId(String videoId) {
         // TODO: These stream transformations make the search two times slower.
         //  I can optimise it by making it part of the indexing.
         return videoRepository.findByVideoId(videoId).stream()
                 .map(Video::getSrt)
                 .map(SrtSubtitles::new)
                 .flatMap(SrtSubtitles::stream)
-                .map(b -> new SubtitleBlock(
+                .map(b -> new SubtitleEntry(
                         b.timeFrame().startTime(),
                         b.timeFrame().endTime(),
                         List.of(String.join(" ", b.text())))

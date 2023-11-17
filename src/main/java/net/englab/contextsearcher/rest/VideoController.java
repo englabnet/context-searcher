@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import net.englab.contextsearcher.exceptions.IndexingConflictException;
 import net.englab.contextsearcher.exceptions.VideoAlreadyExistsException;
 import net.englab.contextsearcher.exceptions.VideoNotFoundException;
-import net.englab.contextsearcher.models.EnglishVariety;
+import net.englab.contextsearcher.models.common.EnglishVariety;
 import net.englab.contextsearcher.models.dto.VideoDto;
 import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.services.VideoIndexer;
@@ -19,7 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import static net.englab.contextsearcher.models.entities.VideoSpecifications.*;
 
 /**
- * A rest controller that handles all the operations related to videos: getting, adding, modifying, removing.
+ * A REST controller that handles all the operations related to videos: getting, adding, modifying, removing.
  */
 @RestController
 @RequiredArgsConstructor

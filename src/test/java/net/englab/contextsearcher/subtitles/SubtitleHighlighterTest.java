@@ -1,6 +1,6 @@
 package net.englab.contextsearcher.subtitles;
 
-import net.englab.contextsearcher.models.subtitles.SubtitleBlock;
+import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -26,19 +26,19 @@ class SubtitleHighlighterTest {
                 "the",
                 " microwave to visible red light."
         };
-        List<SubtitleBlock> blocks = List.of(
-                new SubtitleBlock(0.0, 0.0, List.of("your Lorentz factor by now is 650. And the")),
-                new SubtitleBlock(0.0, 0.0, List.of("left over radiation from the Big Bang, the Cosmic Microwave Background, has now")),
-                new SubtitleBlock(0.0, 0.0, List.of("blue shifted all the way from the microwave to visible red light. Over the"))
+        List<SubtitleEntry> blocks = List.of(
+                new SubtitleEntry(0.0, 0.0, List.of("your Lorentz factor by now is 650. And the")),
+                new SubtitleEntry(0.0, 0.0, List.of("left over radiation from the Big Bang, the Cosmic Microwave Background, has now")),
+                new SubtitleEntry(0.0, 0.0, List.of("blue shifted all the way from the microwave to visible red light. Over the"))
         );
 
 
         SubtitleHighlighter.highlight(sentence, parts, blocks);
 
-        List<SubtitleBlock> expectedBlocks = List.of(
-                new SubtitleBlock(0.0, 0.0, List.of("your Lorentz factor by now is 650. And ", "the")),
-                new SubtitleBlock(0.0, 0.0, List.of("left over radiation from ", "the", " Big Bang, ", "the", " Cosmic Microwave Background, has now")),
-                new SubtitleBlock(0.0, 0.0, List.of("blue shifted all ", "the", " way from ", "the", " microwave to visible red light. Over the"))
+        List<SubtitleEntry> expectedBlocks = List.of(
+                new SubtitleEntry(0.0, 0.0, List.of("your Lorentz factor by now is 650. And ", "the")),
+                new SubtitleEntry(0.0, 0.0, List.of("left over radiation from ", "the", " Big Bang, ", "the", " Cosmic Microwave Background, has now")),
+                new SubtitleEntry(0.0, 0.0, List.of("blue shifted all ", "the", " way from ", "the", " microwave to visible red light. Over the"))
         );
 
         assertEquals(expectedBlocks, blocks);
@@ -55,21 +55,21 @@ class SubtitleHighlighterTest {
                 "did",
                 " Claude Grahame White know that his expensive hobby things were soon to become a major military importance."
         };
-        List<SubtitleBlock> blocks = List.of(
-                new SubtitleBlock(0.0, 0.0, List.of("'I say chaps last one to arrive in Manchester has to telephone the Queen and a blow raspberry'")),
-                new SubtitleBlock(0.0, 0.0, List.of("")),
-                new SubtitleBlock(0.0, 0.0, List.of("But little did Claude Grahame White know that his expensive hobby things")),
-                new SubtitleBlock(0.0, 0.0, List.of("were soon to become a major military importance."))
+        List<SubtitleEntry> blocks = List.of(
+                new SubtitleEntry(0.0, 0.0, List.of("'I say chaps last one to arrive in Manchester has to telephone the Queen and a blow raspberry'")),
+                new SubtitleEntry(0.0, 0.0, List.of("")),
+                new SubtitleEntry(0.0, 0.0, List.of("But little did Claude Grahame White know that his expensive hobby things")),
+                new SubtitleEntry(0.0, 0.0, List.of("were soon to become a major military importance."))
         );
 
 
         SubtitleHighlighter.highlight(sentence, parts, blocks);
 
-        List<SubtitleBlock> expectedBlocks = List.of(
-                new SubtitleBlock(0.0, 0.0, List.of("'I say chaps last one to arrive in Manchester has to telephone the Queen and a blow raspberry'")),
-                new SubtitleBlock(0.0, 0.0, List.of("")),
-                new SubtitleBlock(0.0, 0.0, List.of("But ", "little", " ", "did", " Claude Grahame White know that his expensive hobby things")),
-                new SubtitleBlock(0.0, 0.0, List.of("were soon to become a major military importance."))
+        List<SubtitleEntry> expectedBlocks = List.of(
+                new SubtitleEntry(0.0, 0.0, List.of("'I say chaps last one to arrive in Manchester has to telephone the Queen and a blow raspberry'")),
+                new SubtitleEntry(0.0, 0.0, List.of("")),
+                new SubtitleEntry(0.0, 0.0, List.of("But ", "little", " ", "did", " Claude Grahame White know that his expensive hobby things")),
+                new SubtitleEntry(0.0, 0.0, List.of("were soon to become a major military importance."))
         );
 
         assertEquals(expectedBlocks, blocks);

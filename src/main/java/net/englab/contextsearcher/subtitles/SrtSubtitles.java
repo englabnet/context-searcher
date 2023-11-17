@@ -2,35 +2,33 @@ package net.englab.contextsearcher.subtitles;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import net.englab.contextsearcher.models.subtitles.SrtBlock;
-import net.englab.contextsearcher.models.subtitles.TimeFrame;
+import net.englab.contextsearcher.models.subtitles.SrtEntry;
+import net.englab.contextsearcher.models.common.TimeFrame;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 @Slf4j
-public class SrtSubtitles implements Iterable<SrtBlock> {
+public class SrtSubtitles implements Iterable<SrtEntry> {
     // This pattern is used to replace any unusual separator characters with spaces
     private final static Pattern SEPARATOR_PATTERN = Pattern.compile("[\\p{Z}\\s]");
 
     // The following pattern is used to remove things like this: [intense music], (noises)
     private final static Pattern BRACKETS_PATTERN = Pattern.compile("\\s*(\\[.*?]|\\(.*?\\))");
-    private final List<SrtBlock> srtBlocks;
+    private final List<SrtEntry> srtEntries;
 
     public SrtSubtitles(String srt) {
-        srtBlocks = parseSrtBlocks(srt);
+        srtEntries = parseSrtEntries(srt);
     }
 
-    private static List<SrtBlock> parseSrtBlocks(String srt) {
+    private static List<SrtEntry> parseSrtEntries(String srt) {
         try (BufferedReader srtReader = new BufferedReader(new StringReader(srt))) {
-            List<SrtBlock> result = new ArrayList<>();
+            List<SrtEntry> result = new ArrayList<>();
 
             String line = srtReader.readLine();
             while (line != null && !line.isBlank()) {
@@ -40,12 +38,11 @@ public class SrtSubtitles implements Iterable<SrtBlock> {
                 List<String> text = new ArrayList<>();
                 line = srtReader.readLine();
                 do {
-                    String parsedText = parseTextLine(line);
-                    text.add(parsedText);
+                    parseTextLine(line).ifPresent(text::add);
                     line = srtReader.readLine();
                 } while (line != null && !line.isEmpty());
 
-                result.add(new SrtBlock(id, timeFrame, text));
+                result.add(new SrtEntry(id, timeFrame, text));
 
                 line = srtReader.readLine();
             }
@@ -58,13 +55,14 @@ public class SrtSubtitles implements Iterable<SrtBlock> {
     }
 
     @SneakyThrows
-    private static String parseTextLine(String line) {
+    private static Optional<String> parseTextLine(String line) {
         if (line != null) {
             String text = SEPARATOR_PATTERN.matcher(line).replaceAll(" ");
             // TODO: should this class be responsible for this?
-            return BRACKETS_PATTERN.matcher(text).replaceAll("").trim();
+            String result = BRACKETS_PATTERN.matcher(text).replaceAll("").trim();
+            return Optional.of(result);
         }
-        return null;
+        return Optional.empty();
     }
 
     private static TimeFrame parseTimeFrame(String line) {
@@ -86,11 +84,11 @@ public class SrtSubtitles implements Iterable<SrtBlock> {
     }
 
     @Override
-    public Iterator<SrtBlock> iterator() {
-        return srtBlocks.iterator();
+    public Iterator<SrtEntry> iterator() {
+        return Collections.unmodifiableList(srtEntries).iterator();
     }
 
-    public Stream<SrtBlock> stream() {
-        return srtBlocks.stream();
+    public Stream<SrtEntry> stream() {
+        return srtEntries.stream();
     }
 }

@@ -5,7 +5,7 @@ import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.englab.contextsearcher.models.subtitles.SrtBlock;
+import net.englab.contextsearcher.models.subtitles.SrtEntry;
 import net.englab.contextsearcher.models.subtitles.SubtitleSentence;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class SubtitleSentenceExtractor {
         RangeMap<Integer, Integer> ranges = TreeRangeMap.create();
         StringBuilder sentenceBuilder = new StringBuilder();
 
-        for (SrtBlock block : subtitles) {
+        for (SrtEntry block : subtitles) {
             String blockText = String.join(" ", block.text());
             int blockIndex = block.id() - 1;
             List<String> parts = splitIntoSentences(blockText);

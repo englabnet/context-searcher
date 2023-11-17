@@ -1,4 +1,4 @@
-package net.englab.contextsearcher.models;
+package net.englab.contextsearcher.models.indexing;
 
 import java.time.Instant;
 

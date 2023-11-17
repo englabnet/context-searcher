@@ -6,10 +6,10 @@ import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 import lombok.RequiredArgsConstructor;
 import net.englab.contextsearcher.elastic.VideoDocument;
-import net.englab.contextsearcher.models.EnglishVariety;
-import net.englab.contextsearcher.models.subtitles.SubtitleBlock;
-import net.englab.contextsearcher.models.dto.VideoSearchResponse;
-import net.englab.contextsearcher.models.dto.VideoSearchResult;
+import net.englab.contextsearcher.models.common.EnglishVariety;
+import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
+import net.englab.contextsearcher.models.search.VideoSearchResult;
+import net.englab.contextsearcher.models.search.VideoFragment;
 import net.englab.contextsearcher.subtitles.SubtitleHighlighter;
 import org.springframework.stereotype.Service;
 
@@ -23,20 +23,20 @@ public class VideoSearcher {
     private final ElasticService elasticService;
     private final VideoStorage videoStorage;
 
-    public VideoSearchResponse search(String phrase, EnglishVariety variety, int from, int size) {
+    public VideoSearchResult search(String phrase, EnglishVariety variety, int from, int size) {
         var searchResponse = elasticService.searchVideoByPhrase("videos", phrase, variety, from, size);
 
-        List<VideoSearchResult> videos = searchResponse.hits().hits().stream()
-                .map(this::buildSearchResponse)
+        List<VideoFragment> videos = searchResponse.hits().hits().stream()
+                .map(this::buildVideoFragment)
                 .toList();
 
-        return new VideoSearchResponse(searchResponse.hits().total().value(), videos);
+        return new VideoSearchResult(searchResponse.hits().total().value(), videos);
     }
 
-    private VideoSearchResult buildSearchResponse(Hit<VideoDocument> hit) {
+    private VideoFragment buildVideoFragment(Hit<VideoDocument> hit) {
         VideoDocument doc = hit.source();
 
-        List<SubtitleBlock> subtitles = videoStorage.findSubtitlesByVideoId(doc.getVideoId());
+        List<SubtitleEntry> subtitles = videoStorage.findSubtitlesByVideoId(doc.getVideoId());
 
         String highlight = hit.highlight().get("sentence").get(0);
         String[] parts = highlight.split("<em>|</em>");
@@ -47,7 +47,7 @@ public class VideoSearcher {
         SubtitleHighlighter.highlight(doc.getSentence(), parts, subtitles.subList(beginIndex, endIndex + 1));
 
         int index = ranges.get(parts[0].length());
-        return new VideoSearchResult(doc.getVideoId(), index, subtitles);
+        return new VideoFragment(doc.getVideoId(), index, subtitles);
     }
 
     private RangeMap<Integer, Integer> mapToRanges(Map<String, Integer> map) {

@@ -1,7 +1,7 @@
 package net.englab.contextsearcher.subtitles;
 
-import net.englab.contextsearcher.models.subtitles.SrtBlock;
-import net.englab.contextsearcher.models.subtitles.TimeFrame;
+import net.englab.contextsearcher.models.subtitles.SrtEntry;
+import net.englab.contextsearcher.models.common.TimeFrame;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -36,17 +36,17 @@ class SrtSubtitlesTest {
 
         SrtSubtitles srtSubtitles = new SrtSubtitles(text);
 
-        List<SrtBlock> expectedResult = List.of(
-                new SrtBlock(1, new TimeFrame(0, 3),
+        List<SrtEntry> expectedResult = List.of(
+                new SrtEntry(1, new TimeFrame(0, 3),
                         List.of("The most common words that languages",
                                 "borrow from each other")),
-                new SrtBlock(2, new TimeFrame(3, 6.6),
+                new SrtEntry(2, new TimeFrame(3, 6.6),
                         List.of("are nouns, words for things, probably",
                                 "since it's fairly straightforward")),
-                new SrtBlock(3, new TimeFrame(6.6, 8.88),
+                new SrtEntry(3, new TimeFrame(6.6, 8.88),
                         List.of("to point at an object,",
                                 "say the word for it,")),
-                new SrtBlock(4, new TimeFrame(8.88, 11.76),
+                new SrtEntry(4, new TimeFrame(8.88, 11.76),
                         List.of("and have the other person understand",
                                 "that’s what you’re talking about."))
         );

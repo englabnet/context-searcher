@@ -14,7 +14,7 @@ import co.elastic.clients.json.JsonData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.englab.contextsearcher.elastic.VideoDocument;
-import net.englab.contextsearcher.models.EnglishVariety;
+import net.englab.contextsearcher.models.common.EnglishVariety;
 import net.englab.contextsearcher.elastic.IndexMetadata;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;

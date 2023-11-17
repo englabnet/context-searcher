@@ -2,14 +2,14 @@ package net.englab.contextsearcher.rest;
 
 import lombok.RequiredArgsConstructor;
 import net.englab.contextsearcher.exceptions.IndexingConflictException;
-import net.englab.contextsearcher.models.IndexingInfo;
+import net.englab.contextsearcher.models.indexing.IndexingInfo;
 import net.englab.contextsearcher.services.VideoIndexer;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * A rest controller that allows us to start a new indexing job and get the indexing status.
+ * A REST controller that allows us to start a new indexing job and get the indexing status.
  */
 @RestController
 @RequiredArgsConstructor

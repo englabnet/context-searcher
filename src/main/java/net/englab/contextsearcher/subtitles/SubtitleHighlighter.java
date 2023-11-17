@@ -2,7 +2,7 @@ package net.englab.contextsearcher.subtitles;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import net.englab.contextsearcher.models.subtitles.SubtitleBlock;
+import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ public class SubtitleHighlighter {
      * @param parts the highlighted text (even-numbered elements are highlighted)
      * @param blocks the subtitle blocks where the sentence appears. This param will be modified.
      */
-    public static void highlight(String sentence, String[] parts, List<SubtitleBlock> blocks) {
+    public static void highlight(String sentence, String[] parts, List<SubtitleEntry> blocks) {
         String originalText = blocks.stream()
                 .map(block -> block.getText().get(0).trim())
                 .filter(text -> !text.isBlank())
@@ -31,7 +31,7 @@ public class SubtitleHighlighter {
 
         int p = 0;
         int endIndex = offset + parts[p].length();
-        for (SubtitleBlock block : blocks) {
+        for (SubtitleEntry block : blocks) {
             String line = block.getText().get(0);
 
             // we want to skip any empty lines as they break highlighting
