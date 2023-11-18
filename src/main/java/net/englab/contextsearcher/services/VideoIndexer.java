@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static net.englab.contextsearcher.elastic.ElasticProperties.*;
+import static net.englab.contextsearcher.repositories.VideoSpecifications.*;
 
 /**
  * A video indexer service that allows us to index, update, and remove videos one-by-one
@@ -59,7 +60,7 @@ public class VideoIndexer {
         if (isRunning.get()) {
             throw new IndexingConflictException("A video cannot be indexed while an indexing job is running");
         }
-        videoStorage.findByVideoId(videoId).ifPresent(video -> {
+        videoStorage.findAny(byVideoId(videoId)).ifPresent(video -> {
             throw new VideoAlreadyExistsException("The video already exists.");
         });
         Video video = new Video(null, videoId, variety, srt);
@@ -87,7 +88,7 @@ public class VideoIndexer {
         if (isRunning.get()) {
             throw new IndexingConflictException("A video cannot be updated while an indexing job is running");
         }
-        videoStorage.findById(id).ifPresentOrElse(video -> {
+        videoStorage.findAny(byId(id)).ifPresentOrElse(video -> {
             video.setVideoId(videoId);
             video.setVariety(variety);
             video.setSrt(srt);
@@ -117,7 +118,7 @@ public class VideoIndexer {
             throw new IndexingConflictException("A video cannot be removed while an indexing job is running");
         }
         try {
-            videoStorage.findById(id).ifPresentOrElse(video ->
+            videoStorage.findAny(byId(id)).ifPresentOrElse(video ->
                     elasticService.removeVideo(VIDEOS_INDEX, video.getVideoId()),
             () -> {
                 throw new VideoNotFoundException("The video has not been found and cannot be removed.");

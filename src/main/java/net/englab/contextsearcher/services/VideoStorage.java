@@ -34,26 +34,6 @@ public class VideoStorage {
     }
 
     /**
-     * Finds a video by its unique identifier.
-     *
-     * @param id the unique ID of the video
-     * @return an Optional containing the found video. If no video is found, it wil be empty.
-     */
-    public Optional<Video> findById(Long id) {
-        return videoRepository.findById(id);
-    }
-
-    /**
-     * Finds a video by its YouTube video ID.
-     *
-     * @param videoId the YouTube video ID
-     * @return an Optional containing the found video. If no video is found, it wil be empty.
-     */
-    public Optional<Video> findByVideoId(String videoId) {
-        return videoRepository.findByVideoId(videoId);
-    }
-
-    /**
      * Deletes a video by its unique identifier.
      *
      * @param id the unique ID of the video
@@ -61,6 +41,16 @@ public class VideoStorage {
     @Transactional
     public void deleteById(Long id) {
         videoRepository.deleteById(id);
+    }
+
+    /**
+     * Finds any videos that matched the specified filters.
+     *
+     * @param specification the specified filters
+     * @return an Optional containing the found video. If no video is found, it wil be empty.
+     */
+    public Optional<Video> findAny(Specification<Video> specification) {
+        return videoRepository.findOne(specification);
     }
 
     /**
