@@ -19,7 +19,7 @@ public class Video {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
-    private String videoId;
+    private String videoId; // TODO: rename it to youtubeVideoId
     @Enumerated(STRING)
     private EnglishVariety variety;
     private String srt;

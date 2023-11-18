@@ -187,7 +187,7 @@ public class ElasticService {
      * Removes the specified video from the index.
      *
      * @param index     the index name
-     * @param videoId   the video id
+     * @param videoId   the YouTube video ID
      */
     public void removeVideo(String index, String videoId) {
         try {

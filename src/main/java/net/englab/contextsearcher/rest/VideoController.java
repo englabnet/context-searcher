@@ -30,13 +30,13 @@ public class VideoController {
     private final VideoStorage videoStorage;
 
     /**
-     * Returns the list of videos that we have in the system.
+     * Returns a page of videos that match the specified filters.
      *
-     * @param id        filter by id
-     * @param videoId   filter by video id
+     * @param id        filter by ID
+     * @param videoId   filter by YouTube video ID
      * @param variety   filter by variety of English
      * @param pageable  pagination and sorting
-     * @return a list of videos
+     * @return a page of videos
      */
     @GetMapping
     public Page<Video> getVideos(Long id, String videoId, EnglishVariety variety, Pageable pageable) {
@@ -65,7 +65,7 @@ public class VideoController {
     /**
      * Updates the given video.
      *
-     * @param id    the id of the video that needs to be updated
+     * @param id    the ID of the video that needs to be updated
      * @param video the modified video data
      * @return a status message after updating the video
      */
@@ -82,9 +82,9 @@ public class VideoController {
     }
 
     /**
-     * Removes a video by the specified id.
+     * Removes a video by the specified ID.
      *
-     * @param id the id of the video that needs to be removed
+     * @param id the ID of the video that needs to be removed
      * @return a status message after removing the video
      */
     @DeleteMapping("/{id}")

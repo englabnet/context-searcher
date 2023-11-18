@@ -49,7 +49,7 @@ public class VideoIndexer {
     /**
      * Adds a new video.
      *
-     * @param videoId   the video id
+     * @param videoId   the YouTube video ID
      * @param variety   the variety of English used in the video
      * @param srt       the subtitles for the video in SRT format
      * @throws IndexingConflictException if an indexing job is running
@@ -76,10 +76,10 @@ public class VideoIndexer {
     /**
      * Updates the specified video.
      *
-     * @param id        the id
-     * @param videoId   the video id
-     * @param variety   the variety of English used in the video
-     * @param srt       the subtitles for the video in SRT format
+     * @param id        the ID of the video we are updating
+     * @param videoId   the updated YouTube video ID
+     * @param variety   the updated variety of English used in the video
+     * @param srt       the updated subtitles for the video in SRT format
      * @throws IndexingConflictException if an indexing job is running
      * @throws VideoNotFoundException if the video is not found
      */
@@ -106,9 +106,9 @@ public class VideoIndexer {
     }
 
     /**
-     * Removes a video by the specified id.
+     * Removes a video by the specified ID.
      *
-     * @param id the id
+     * @param id the ID of the video we want to remove
      * @throws IndexingConflictException if an indexing job is running
      * @throws VideoNotFoundException if the video is not found
      */
