@@ -1,4 +1,4 @@
-package net.englab.contextsearcher.elastic;
+package net.englab.contextsearcher.models.elastic;
 
 import java.time.Instant;
 

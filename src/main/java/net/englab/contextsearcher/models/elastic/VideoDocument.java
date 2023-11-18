@@ -1,4 +1,4 @@
-package net.englab.contextsearcher.elastic;
+package net.englab.contextsearcher.models.elastic;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

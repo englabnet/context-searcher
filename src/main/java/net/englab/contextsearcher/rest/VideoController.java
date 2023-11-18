@@ -16,7 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import static net.englab.contextsearcher.models.entities.VideoSpecifications.*;
+import static net.englab.contextsearcher.repositories.VideoSpecifications.*;
 
 /**
  * A REST controller that handles all the operations related to videos: getting, adding, modifying, removing.

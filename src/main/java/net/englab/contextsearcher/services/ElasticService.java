@@ -13,9 +13,9 @@ import co.elastic.clients.elasticsearch.indices.get_mapping.IndexMappingRecord;
 import co.elastic.clients.json.JsonData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.englab.contextsearcher.elastic.VideoDocument;
+import net.englab.contextsearcher.models.elastic.VideoDocument;
 import net.englab.contextsearcher.models.common.EnglishVariety;
-import net.englab.contextsearcher.elastic.IndexMetadata;
+import net.englab.contextsearcher.models.elastic.IndexMetadata;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
+// TODO: this class needs refactoring as it contains general purpose methods as well as specialised methods.
 @Slf4j
 @Service
 @RequiredArgsConstructor

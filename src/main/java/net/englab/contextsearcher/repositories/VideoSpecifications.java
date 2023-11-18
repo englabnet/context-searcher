@@ -1,6 +1,7 @@
-package net.englab.contextsearcher.models.entities;
+package net.englab.contextsearcher.repositories;
 
 import net.englab.contextsearcher.models.common.EnglishVariety;
+import net.englab.contextsearcher.models.entities.Video;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 

@@ -5,7 +5,7 @@ import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 import lombok.RequiredArgsConstructor;
-import net.englab.contextsearcher.elastic.VideoDocument;
+import net.englab.contextsearcher.models.elastic.VideoDocument;
 import net.englab.contextsearcher.models.common.EnglishVariety;
 import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
 import net.englab.contextsearcher.models.search.VideoSearchResult;
