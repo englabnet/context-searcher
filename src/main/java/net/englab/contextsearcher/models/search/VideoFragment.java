@@ -13,7 +13,7 @@ import java.util.List;
  */
 public record VideoFragment(
         String videoId, // TODO: rename it to youtubeVideoId
-        Integer index, // TODO: rename it to subtitleBlockIndex
+        Integer index, // TODO: rename it to subtitleEntryIndex
         List<SubtitleEntry> subtitles
 ) {
 }
