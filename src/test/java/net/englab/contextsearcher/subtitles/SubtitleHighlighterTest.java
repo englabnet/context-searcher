@@ -46,7 +46,7 @@ class SubtitleHighlighterTest {
 
     @Test
     void emptyBlockTest() {
-        String sentence = "'I say chaps last one to arrive in Manchester has to telephone the Queen and a blow raspberry' " +
+        String sentence = "'I say chaps last one to arrive in Manchester has to telephone the Queen and a blow raspberry'  " +
                 "But little did Claude Grahame White know that his expensive hobby things were soon to become a major military importance.";
         String[] parts = {
                 "'I say chaps last one to arrive in Manchester has to telephone the Queen and a blow raspberry' But ",
