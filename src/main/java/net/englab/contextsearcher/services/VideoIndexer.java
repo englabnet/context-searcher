@@ -15,7 +15,6 @@ import net.englab.contextsearcher.models.elastic.IndexMetadata;
 import net.englab.contextsearcher.models.indexing.IndexingInfo;
 import net.englab.contextsearcher.models.subtitles.SubtitleSentence;
 import net.englab.contextsearcher.models.entities.Video;
-import net.englab.contextsearcher.subtitles.SubtitleSentenceExtractor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +41,7 @@ public class VideoIndexer {
 
     private final VideoStorage videoStorage;
     private final ElasticService elasticService;
+    private final SubtitleSentenceExtractor sentenceExtractor;
 
     private final ThreadPoolTaskExecutor executor;
     private IndexingInfo indexingInfo = IndexingInfo.none();
@@ -221,13 +221,13 @@ public class VideoIndexer {
         List<VideoDocument> docs = new ArrayList<>();
         List<Future<BulkResponse>> futures = new ArrayList<>();
         for (Video video : videos) {
-            List<SubtitleSentence> sentences = SubtitleSentenceExtractor.extract(video.getSrt());
+            List<SubtitleSentence> sentences = sentenceExtractor.extract(video.getSrt());
             for (SubtitleSentence sentence : sentences) {
                 VideoDocument doc = new VideoDocument(
                         video.getVideoId(),
                         video.getVariety().name(),
                         sentence.text(),
-                        rangesToMap(sentence.subtitleBlocks()));
+                        rangesToMap(sentence.subtitleRangeMap()));
                 if (docs.size() >= BULK_SIZE) {
                     futures.add(elasticService.indexDocuments(index, docs));
                     docs = new ArrayList<>();

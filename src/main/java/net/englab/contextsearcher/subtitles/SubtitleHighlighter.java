@@ -16,12 +16,11 @@ public class SubtitleHighlighter {
      *
      * @param sentence the sentence from elastic
      * @param parts the highlighted text (even-numbered elements are highlighted)
-     * @param blocks the subtitle blocks where the sentence appears. This param will be modified.
+     * @param entries the subtitle entries where the sentence appears. This param will be modified.
      */
-    public static void highlight(String sentence, String[] parts, List<SubtitleEntry> blocks) {
-        String originalText = blocks.stream()
-                .map(block -> block.getText().get(0).trim())
-                .filter(text -> !text.isBlank())
+    public static void highlight(String sentence, String[] parts, List<SubtitleEntry> entries) {
+        String originalText = entries.stream()
+                .map(entry -> entry.getText().get(0))
                 .collect(Collectors.joining(" "));
 
         int offset = originalText.indexOf(sentence);
@@ -31,8 +30,8 @@ public class SubtitleHighlighter {
 
         int p = 0;
         int endIndex = offset + parts[p].length();
-        for (SubtitleEntry block : blocks) {
-            String line = block.getText().get(0);
+        for (SubtitleEntry entry : entries) {
+            String line = entry.getText().get(0);
 
             // we want to skip any empty lines as they break highlighting
             if (line.isEmpty()) continue;
@@ -57,7 +56,7 @@ public class SubtitleHighlighter {
 
             endIndex -= line.length() + 1;
 
-            block.setText(result);
+            entry.setText(result);
         }
     }
 }

@@ -13,6 +13,9 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+/**
+ * A class that parses SRT subtitles, providing various methods for the further processing of SRT entries.
+ */
 @Slf4j
 public class SrtSubtitles implements Iterable<SrtEntry> {
     // This pattern is used to replace any unusual separator characters with spaces
@@ -22,6 +25,11 @@ public class SrtSubtitles implements Iterable<SrtEntry> {
     private final static Pattern BRACKETS_PATTERN = Pattern.compile("\\s*(\\[.*?]|\\(.*?\\))");
     private final List<SrtEntry> srtEntries;
 
+    /**
+     * Create new SRT subtitles.
+     *
+     * @param srt text that represents subtitles in the SRT format
+     */
     public SrtSubtitles(String srt) {
         srtEntries = parseSrtEntries(srt);
     }
@@ -83,11 +91,17 @@ public class SrtSubtitles implements Iterable<SrtEntry> {
         return duration.getSeconds() + duration.getNano() / 1_000_000_000.0;
     }
 
+    /**
+     * Returns a read-only iterator over the SRT entries.
+     */
     @Override
     public Iterator<SrtEntry> iterator() {
         return Collections.unmodifiableList(srtEntries).iterator();
     }
 
+    /**
+     * Returns a stream with the SRT entries as its source.
+     */
     public Stream<SrtEntry> stream() {
         return srtEntries.stream();
     }
