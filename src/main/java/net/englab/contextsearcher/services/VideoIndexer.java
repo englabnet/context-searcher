@@ -6,12 +6,12 @@ import com.google.common.collect.RangeMap;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import net.englab.contextsearcher.models.elastic.VideoDocument;
+import net.englab.contextsearcher.models.elastic.VideoFragmentDocument;
 import net.englab.contextsearcher.exceptions.IndexingConflictException;
 import net.englab.contextsearcher.exceptions.VideoAlreadyExistsException;
 import net.englab.contextsearcher.exceptions.VideoNotFoundException;
 import net.englab.contextsearcher.models.common.EnglishVariety;
-import net.englab.contextsearcher.models.elastic.IndexMetadata;
+import net.englab.contextsearcher.models.elastic.VideoIndexMetadata;
 import net.englab.contextsearcher.models.indexing.IndexingInfo;
 import net.englab.contextsearcher.models.subtitles.SubtitleSentence;
 import net.englab.contextsearcher.models.entities.Video;
@@ -190,7 +190,7 @@ public class VideoIndexer {
 
         indexVideos(indexName, videos);
 
-        elasticService.setIndexMetadata(indexName, new IndexMetadata(startTime, Instant.now()));
+        elasticService.setIndexMetadata(indexName, new VideoIndexMetadata(startTime, Instant.now()));
         log.info("The index metadata has been updated.");
 
         elasticService.putAlias(indexName, VIDEOS_INDEX);
@@ -218,12 +218,12 @@ public class VideoIndexer {
     }
 
     private List<Future<BulkResponse>> bulkIndex(String index, Collection<Video> videos) {
-        List<VideoDocument> docs = new ArrayList<>();
+        List<VideoFragmentDocument> docs = new ArrayList<>();
         List<Future<BulkResponse>> futures = new ArrayList<>();
         for (Video video : videos) {
             List<SubtitleSentence> sentences = sentenceExtractor.extract(video.getSrt());
             for (SubtitleSentence sentence : sentences) {
-                VideoDocument doc = new VideoDocument(
+                VideoFragmentDocument doc = new VideoFragmentDocument(
                         video.getVideoId(),
                         video.getVariety().name(),
                         sentence.text(),

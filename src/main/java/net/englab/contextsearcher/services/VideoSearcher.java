@@ -5,7 +5,7 @@ import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 import lombok.RequiredArgsConstructor;
-import net.englab.contextsearcher.models.elastic.VideoDocument;
+import net.englab.contextsearcher.models.elastic.VideoFragmentDocument;
 import net.englab.contextsearcher.models.common.EnglishVariety;
 import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
 import net.englab.contextsearcher.models.search.VideoSearchResult;
@@ -33,14 +33,14 @@ public class VideoSearcher {
         return new VideoSearchResult(searchResponse.hits().total().value(), videos);
     }
 
-    private VideoFragment buildVideoFragment(Hit<VideoDocument> hit) {
-        VideoDocument doc = hit.source();
-
+    private VideoFragment buildVideoFragment(Hit<VideoFragmentDocument> hit) {
+        VideoFragmentDocument doc = hit.source();
+        doc.setVideoId("123");
         List<SubtitleEntry> subtitles = videoStorage.findSubtitlesByVideoId(doc.getVideoId());
 
         String highlight = hit.highlight().get("sentence").get(0);
         String[] parts = highlight.split("<em>|</em>");
-        RangeMap<Integer, Integer> ranges = mapToRanges(doc.getSubtitleBlocks());
+        RangeMap<Integer, Integer> ranges = mapToRanges(doc.getSentenceRangeMap());
 
         int beginIndex = ranges.get(0);
         int endIndex = ranges.get(doc.getSentence().length() - 1);

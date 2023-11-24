@@ -13,9 +13,9 @@ import co.elastic.clients.elasticsearch.indices.get_mapping.IndexMappingRecord;
 import co.elastic.clients.json.JsonData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.englab.contextsearcher.models.elastic.VideoDocument;
+import net.englab.contextsearcher.models.elastic.VideoFragmentDocument;
 import net.englab.contextsearcher.models.common.EnglishVariety;
-import net.englab.contextsearcher.models.elastic.IndexMetadata;
+import net.englab.contextsearcher.models.elastic.VideoIndexMetadata;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -96,7 +96,7 @@ public class ElasticService {
      * @param index the index name
      * @return an Optional containing the index metadata if available
      */
-    public Optional<IndexMetadata> getIndexMetadata(String index) {
+    public Optional<VideoIndexMetadata> getIndexMetadata(String index) {
         try {
             if (isIndexAbsent(index)) {
                 return Optional.empty();
@@ -108,7 +108,7 @@ public class ElasticService {
                     .map(IndexMappingRecord::mappings)
                     .map(TypeMapping::meta)
                     .filter(this::containsMetadata)
-                    .map(meta -> new IndexMetadata(
+                    .map(meta -> new VideoIndexMetadata(
                             meta.get("startTime").to(Instant.class),
                             meta.get("finishTime").to(Instant.class)
                     ));
@@ -134,7 +134,7 @@ public class ElasticService {
      * @param index     the index name
      * @param metadata  the index metadata
      */
-    public void setIndexMetadata(String index, IndexMetadata metadata) {
+    public void setIndexMetadata(String index, VideoIndexMetadata metadata) {
         try {
             elasticsearchClient.indices().putMapping(m -> m
                     .index(index)
@@ -243,8 +243,8 @@ public class ElasticService {
      * @param size      the number of results to be returned
      * @return a SearchResponse object containing the search results
      */
-    public SearchResponse<VideoDocument> searchVideoByPhrase(String index, String phrase,
-                                                             EnglishVariety variety, int from, int size) {
+    public SearchResponse<VideoFragmentDocument> searchVideoByPhrase(String index, String phrase,
+                                                                     EnglishVariety variety, int from, int size) {
         try {
             return elasticsearchClient.search(b -> b
                     .index(index)
@@ -255,7 +255,7 @@ public class ElasticService {
                             .fields("sentence", f -> f
                                     .numberOfFragments(0)
                             )
-                    ), VideoDocument.class);
+                    ), VideoFragmentDocument.class);
         } catch (IOException e) {
             log.error("An exception occurred during doc search", e);
             throw new RuntimeException(e);

@@ -3,7 +3,7 @@ package net.englab.contextsearcher.models.dto;
 import net.englab.contextsearcher.models.common.EnglishVariety;
 
 /**
- * A data transfer object class that represents video.
+ * A data transfer object record that represents video.
  *
  * @param videoId   the YouTube video ID
  * @param variety   the variety of English
