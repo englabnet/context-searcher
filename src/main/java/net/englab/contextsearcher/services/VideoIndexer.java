@@ -1,7 +1,11 @@
 package net.englab.contextsearcher.services;
 
+import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
 import co.elastic.clients.elasticsearch._types.mapping.ObjectProperty;
+import co.elastic.clients.elasticsearch._types.mapping.Property;
+import co.elastic.clients.elasticsearch._types.mapping.TextProperty;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
+import co.elastic.clients.json.JsonData;
 import com.google.common.collect.RangeMap;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -15,6 +19,8 @@ import net.englab.contextsearcher.models.elastic.VideoIndexMetadata;
 import net.englab.contextsearcher.models.indexing.IndexingInfo;
 import net.englab.contextsearcher.models.subtitles.SubtitleSentence;
 import net.englab.contextsearcher.models.entities.Video;
+import net.englab.contextsearcher.services.elastic.ElasticDocumentManager;
+import net.englab.contextsearcher.services.elastic.ElasticIndexManager;
 import net.englab.contextsearcher.subtitles.SubtitleSentenceExtractor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -25,7 +31,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static net.englab.contextsearcher.elastic.ElasticProperties.*;
 import static net.englab.contextsearcher.repositories.VideoSpecifications.*;
 
 /**
@@ -38,10 +43,18 @@ import static net.englab.contextsearcher.repositories.VideoSpecifications.*;
 public class VideoIndexer {
 
     private final static int BULK_SIZE = 10_000;
-    public final static String VIDEOS_INDEX = "videos";
+    private final static String VIDEOS_INDEX = "videos";
+    private final static Map<String, Property> VIDEO_INDEX_PROPERTIES = Map.of(
+            "video_id", KeywordProperty.of(b -> b)._toProperty(),
+            "sentence", TextProperty.of(b -> b)._toProperty(),
+            "variety", KeywordProperty.of(b -> b)._toProperty(),
+            "subtitle_blocks", ObjectProperty.of(b -> b.enabled(false))._toProperty()
+    );
 
     private final VideoStorage videoStorage;
-    private final ElasticService elasticService;
+
+    private final ElasticIndexManager indexManager;
+    private final ElasticDocumentManager documentManager;
     private final SubtitleSentenceExtractor sentenceExtractor = new SubtitleSentenceExtractor();
 
     private final ThreadPoolTaskExecutor executor;
@@ -94,7 +107,7 @@ public class VideoIndexer {
             video.setVariety(variety);
             video.setSrt(srt);
             videoStorage.save(video);
-            elasticService.removeVideo(VIDEOS_INDEX, video.getVideoId());
+            documentManager.deleteByFieldValue(VIDEOS_INDEX, "video_id", video.getVideoId());
             try {
                 indexVideos(VIDEOS_INDEX, List.of(video));
             } catch (Exception e) {
@@ -120,7 +133,7 @@ public class VideoIndexer {
         }
         try {
             videoStorage.findAny(byId(id)).ifPresentOrElse(video ->
-                    elasticService.removeVideo(VIDEOS_INDEX, video.getVideoId()),
+                    documentManager.deleteByFieldValue(VIDEOS_INDEX, "video_id", video.getVideoId()),
             () -> {
                 throw new VideoNotFoundException("The video has not been found and cannot be removed.");
             });
@@ -138,8 +151,11 @@ public class VideoIndexer {
      */
     public IndexingInfo getIndexingStatus() {
         if (!isRunning.get()) {
-            elasticService.getIndexMetadata(VIDEOS_INDEX)
-                    .ifPresent(meta -> indexingInfo = IndexingInfo.completed(meta.startTime(), meta.finishTime()));
+            Map<String, JsonData> metadata = indexManager.getMetadata(VIDEOS_INDEX);
+            if (!metadata.isEmpty()) {
+                VideoIndexMetadata videoIndexMetadata = new VideoIndexMetadata(metadata);
+                indexingInfo = IndexingInfo.completed(videoIndexMetadata.startTime(), videoIndexMetadata.finishTime());
+            }
         }
         return indexingInfo;
     }
@@ -157,8 +173,6 @@ public class VideoIndexer {
         executor.execute(() -> {
             try {
                 log.info("Full indexing has been started.");
-                elasticService.removeIndex(VIDEOS_INDEX);
-                log.info("The old index has been removed.");
                 log.info("Start reading videos from the database...");
                 List<Video> videos = videoStorage.findAll();
                 log.info("Start indexing the videos...");
@@ -178,26 +192,22 @@ public class VideoIndexer {
     private void startFullIndexing(Collection<Video> videos) {
         Instant startTime = Instant.now();
 
-        Optional<String> oldIndexName = elasticService.getIndexName(VIDEOS_INDEX);
+        Optional<String> oldIndexName = indexManager.getIndexName(VIDEOS_INDEX);
 
         String indexName = generateVideoIndexName();
-        elasticService.createIndex(indexName, Map.of(
-                "video_id", KEYWORD_PROPERTY,
-                "sentence", TEXT_PROPERTY,
-                "variety", KEYWORD_PROPERTY,
-                "subtitle_blocks", ObjectProperty.of(b -> b.enabled(false))._toProperty()
-        ));
+        indexManager.create(indexName, VIDEO_INDEX_PROPERTIES);
         log.info("A new index '{}' has been created.", indexName);
 
         indexVideos(indexName, videos);
 
-        elasticService.setIndexMetadata(indexName, new VideoIndexMetadata(startTime, Instant.now()));
+        VideoIndexMetadata videoIndexMetadata = new VideoIndexMetadata(startTime, Instant.now());
+        indexManager.setMetadata(indexName, videoIndexMetadata.toMetadata());
         log.info("The index metadata has been updated.");
 
-        elasticService.putAlias(indexName, VIDEOS_INDEX);
+        indexManager.putAlias(indexName, VIDEOS_INDEX);
         log.info("The alias has been updated.");
 
-        oldIndexName.ifPresent(elasticService::removeIndex);
+        oldIndexName.ifPresent(indexManager::delete);
         log.info("The old index has been removed.");
     }
 
@@ -230,14 +240,14 @@ public class VideoIndexer {
                         sentence.text(),
                         rangesToMap(sentence.subtitleRangeMap()));
                 if (docs.size() >= BULK_SIZE) {
-                    futures.add(elasticService.indexDocuments(index, docs));
+                    futures.add(documentManager.index(index, docs));
                     docs = new ArrayList<>();
                 }
                 docs.add(doc);
             }
         }
         if (!docs.isEmpty()) {
-            futures.add(elasticService.indexDocuments(index, docs));
+            futures.add(documentManager.index(index, docs));
         }
         return futures;
     }
