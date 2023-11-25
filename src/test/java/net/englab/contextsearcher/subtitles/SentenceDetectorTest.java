@@ -1,13 +1,12 @@
-package net.englab.contextsearcher.services;
+package net.englab.contextsearcher.subtitles;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.DefaultResourceLoader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SentenceDetectorTest {
 
-    private final SentenceDetector sentenceDetector = new SentenceDetector(new DefaultResourceLoader());
+    private final SentenceDetector sentenceDetector = new SentenceDetector();
 
     @Test
     void test() {

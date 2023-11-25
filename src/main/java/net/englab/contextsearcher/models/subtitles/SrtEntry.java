@@ -9,7 +9,7 @@ import java.util.List;
  *
  * @param id        the identifier of the entry
  * @param timeFrame the time frame of the entry
- * @param text      the text of the entry
+ * @param text      the text of the entry. This list may contain several lines of text.
  */
 public record SrtEntry(int id, TimeFrame timeFrame, List<String> text) {
 }

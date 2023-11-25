@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import net.englab.contextsearcher.models.elastic.VideoFragmentDocument;
 import net.englab.contextsearcher.models.common.EnglishVariety;
 import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
-import net.englab.contextsearcher.models.search.VideoSearchResult;
+import net.englab.contextsearcher.models.search.VideoFragmentPage;
 import net.englab.contextsearcher.models.search.VideoFragment;
 import net.englab.contextsearcher.subtitles.SubtitleHighlighter;
 import org.springframework.stereotype.Service;
@@ -23,14 +23,14 @@ public class VideoSearcher {
     private final ElasticService elasticService;
     private final VideoStorage videoStorage;
 
-    public VideoSearchResult search(String phrase, EnglishVariety variety, int from, int size) {
+    public VideoFragmentPage search(String phrase, EnglishVariety variety, int from, int size) {
         var searchResponse = elasticService.searchVideoByPhrase("videos", phrase, variety, from, size);
 
         List<VideoFragment> videos = searchResponse.hits().hits().stream()
                 .map(this::buildVideoFragment)
                 .toList();
 
-        return new VideoSearchResult(searchResponse.hits().total().value(), videos);
+        return new VideoFragmentPage(searchResponse.hits().total().value(), videos);
     }
 
     private VideoFragment buildVideoFragment(Hit<VideoFragmentDocument> hit) {

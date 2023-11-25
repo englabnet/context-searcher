@@ -2,7 +2,7 @@ package net.englab.contextsearcher.rest;
 
 import lombok.RequiredArgsConstructor;
 import net.englab.contextsearcher.models.common.EnglishVariety;
-import net.englab.contextsearcher.models.search.VideoSearchResult;
+import net.englab.contextsearcher.models.search.VideoFragmentPage;
 import net.englab.contextsearcher.services.VideoSearcher;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +29,7 @@ public class SearchController {
      * @return a video search result
      */
     @GetMapping
-    public VideoSearchResult search(
+    public VideoFragmentPage search(
             String phrase,
             EnglishVariety variety,
             @RequestParam(defaultValue = "0") int from, // TODO: change it to a page

@@ -11,7 +11,7 @@ import static jakarta.persistence.EnumType.*;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 /**
- * Represents a video stored in the database.
+ * Represents a video entity stored in the database.
  */
 @Getter
 @Setter
@@ -19,6 +19,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @AllArgsConstructor
 @Entity
 public class Video {
+
     /**
      * The unique identifier of the video.
      */

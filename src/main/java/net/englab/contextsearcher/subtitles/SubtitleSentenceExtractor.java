@@ -1,27 +1,22 @@
-package net.englab.contextsearcher.services;
+package net.englab.contextsearcher.subtitles;
 
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
-import lombok.RequiredArgsConstructor;
 import net.englab.contextsearcher.models.subtitles.SrtEntry;
 import net.englab.contextsearcher.models.subtitles.SubtitleSentence;
-import net.englab.contextsearcher.subtitles.SrtSubtitles;
 import opennlp.tools.util.Span;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
 /**
- * A service that is used to extract sentences from subtitles in the SRT format.
+ * A class that is used to extract sentences from subtitles in the SRT format.
  */
-@Service
-@RequiredArgsConstructor
 public class SubtitleSentenceExtractor {
 
-    private final SentenceDetector sentenceDetector;
+    private final SentenceDetector sentenceDetector = new SentenceDetector();
 
     /**
      * Extracts sentences from the given SRT subtitles.

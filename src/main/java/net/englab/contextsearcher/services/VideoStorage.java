@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * A video storage service that provides basic operations such as saving, deleting, and searching videos.
+ * A video storage service that provides basic operations
+ * such as saving, deleting, and searching videos.
  */
 @Service
 @RequiredArgsConstructor
@@ -47,7 +48,8 @@ public class VideoStorage {
      * Finds any videos that matched the specified filters.
      *
      * @param specification the specified filters
-     * @return an Optional containing the found video. If no video is found, it wil be empty.
+     * @return  an Optional containing the found video.
+     *          If no video is found, it wil be empty.
      */
     public Optional<Video> findAny(Specification<Video> specification) {
         return videoRepository.findOne(specification);

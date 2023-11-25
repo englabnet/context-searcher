@@ -15,6 +15,7 @@ import net.englab.contextsearcher.models.elastic.VideoIndexMetadata;
 import net.englab.contextsearcher.models.indexing.IndexingInfo;
 import net.englab.contextsearcher.models.subtitles.SubtitleSentence;
 import net.englab.contextsearcher.models.entities.Video;
+import net.englab.contextsearcher.subtitles.SubtitleSentenceExtractor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +42,7 @@ public class VideoIndexer {
 
     private final VideoStorage videoStorage;
     private final ElasticService elasticService;
-    private final SubtitleSentenceExtractor sentenceExtractor;
+    private final SubtitleSentenceExtractor sentenceExtractor = new SubtitleSentenceExtractor();
 
     private final ThreadPoolTaskExecutor executor;
     private IndexingInfo indexingInfo = IndexingInfo.none();

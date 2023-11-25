@@ -1,8 +1,7 @@
-package net.englab.contextsearcher.services;
+package net.englab.contextsearcher.subtitles;
 
 import net.englab.contextsearcher.models.subtitles.SubtitleSentence;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.DefaultResourceLoader;
 
 import java.util.List;
 
@@ -10,8 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 class SubtitleSentenceExtractorTest {
-    private final SentenceDetector sentenceDetector = new SentenceDetector(new DefaultResourceLoader());
-    private final SubtitleSentenceExtractor sentenceExtractor = new SubtitleSentenceExtractor(sentenceDetector);
+    private final SubtitleSentenceExtractor sentenceExtractor = new SubtitleSentenceExtractor();
 
     @Test
     void testLongSentence() {
