@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static net.englab.contextsearcher.elastic.VideoIndexProperties.*;
+
 /**
  * A service that handles video searching.
  */
@@ -31,8 +33,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class VideoSearcher {
-
-    private static final String VIDEOS_INDEX = "videos";
 
     private final ElasticsearchClient elasticsearchClient;
     private final VideoStorage videoStorage;
@@ -64,12 +64,12 @@ public class VideoSearcher {
     private SearchResponse<VideoFragmentDocument> searchDocuments(String phrase, EnglishVariety variety, int from, int size) {
         try {
             return elasticsearchClient.search(b -> b
-                    .index(VIDEOS_INDEX)
+                    .index(VIDEO_INDEX_NAME)
                     .from(from)
                     .size(size)
                     .query(buildVideoQuery(phrase, variety)._toQuery())
                     .highlight(h -> h
-                            .fields("sentence", f -> f
+                            .fields(SENTENCE, f -> f
                                     .numberOfFragments(0)
                             )
                     ), VideoFragmentDocument.class);
@@ -81,9 +81,9 @@ public class VideoSearcher {
 
     private static BoolQuery buildVideoQuery(String phrase, EnglishVariety variety) {
         BoolQuery.Builder builder = new BoolQuery.Builder()
-                .must(m -> m.matchPhrase(p -> p.field("sentence").query(phrase)));
+                .must(m -> m.matchPhrase(p -> p.field(SENTENCE).query(phrase)));
         if (variety != EnglishVariety.ALL) {
-            builder.filter(f -> f.term(t -> t.field("variety").value(variety.name())));
+            builder.filter(f -> f.term(t -> t.field(ENGLISH_VARIETY).value(variety.name())));
         }
         return builder.build();
     }
@@ -99,7 +99,7 @@ public class VideoSearcher {
 
         List<SubtitleEntry> subtitles = videoStorage.findSubtitlesByVideoId(doc.getVideoId());
 
-        String highlight = hit.highlight().get("sentence").get(0);
+        String highlight = hit.highlight().get(SENTENCE).get(0);
 
         // elastic wraps highlighted text in <em> and </em> tags
         String[] textParts = highlight.split("<em>|</em>");

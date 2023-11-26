@@ -31,6 +31,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import static net.englab.contextsearcher.elastic.VideoIndexProperties.*;
 import static net.englab.contextsearcher.repositories.VideoSpecifications.*;
 
 /**
@@ -41,14 +42,12 @@ import static net.englab.contextsearcher.repositories.VideoSpecifications.*;
 @Service
 @RequiredArgsConstructor
 public class VideoIndexer {
-
     private static final int BULK_SIZE = 10_000;
-    private static final String VIDEOS_INDEX = "videos";
     private static final Map<String, Property> VIDEO_INDEX_PROPERTIES = Map.of(
-            "video_id", KeywordProperty.of(b -> b)._toProperty(),
-            "sentence", TextProperty.of(b -> b)._toProperty(),
-            "variety", KeywordProperty.of(b -> b)._toProperty(),
-            "subtitle_blocks", ObjectProperty.of(b -> b.enabled(false))._toProperty()
+            YOUTUBE_VIDEO_ID, KeywordProperty.of(b -> b)._toProperty(),
+            SENTENCE, TextProperty.of(b -> b)._toProperty(),
+            ENGLISH_VARIETY, KeywordProperty.of(b -> b)._toProperty(),
+            SUBTITLE_RANGE_MAP, ObjectProperty.of(b -> b.enabled(false))._toProperty()
     );
 
     private final VideoStorage videoStorage;
@@ -80,7 +79,7 @@ public class VideoIndexer {
         Video video = new Video(null, videoId, variety, srt);
         Long id = videoStorage.save(video);
         try {
-            indexVideos(VIDEOS_INDEX, List.of(video));
+            indexVideos(VIDEO_INDEX_NAME, List.of(video));
         } catch (Exception e) {
             log.error("Exception occurred during video indexing", e);
             videoStorage.deleteById(id);
@@ -107,9 +106,9 @@ public class VideoIndexer {
             video.setVariety(variety);
             video.setSrt(srt);
             videoStorage.save(video);
-            documentManager.deleteByFieldValue(VIDEOS_INDEX, "video_id", video.getVideoId());
+            documentManager.deleteByFieldValue(VIDEO_INDEX_NAME, YOUTUBE_VIDEO_ID, video.getVideoId());
             try {
-                indexVideos(VIDEOS_INDEX, List.of(video));
+                indexVideos(VIDEO_INDEX_NAME, List.of(video));
             } catch (Exception e) {
                 log.error("Exception occurred during video updating", e);
                 videoStorage.deleteById(id);
@@ -133,7 +132,7 @@ public class VideoIndexer {
         }
         try {
             videoStorage.findAny(byId(id)).ifPresentOrElse(video ->
-                    documentManager.deleteByFieldValue(VIDEOS_INDEX, "video_id", video.getVideoId()),
+                    documentManager.deleteByFieldValue(VIDEO_INDEX_NAME, YOUTUBE_VIDEO_ID, video.getVideoId()),
             () -> {
                 throw new VideoNotFoundException("The video has not been found and cannot be removed.");
             });
@@ -151,7 +150,7 @@ public class VideoIndexer {
      */
     public IndexingInfo getIndexingStatus() {
         if (!isRunning.get()) {
-            Map<String, JsonData> metadata = indexManager.getMetadata(VIDEOS_INDEX);
+            Map<String, JsonData> metadata = indexManager.getMetadata(VIDEO_INDEX_NAME);
             if (!metadata.isEmpty()) {
                 VideoIndexMetadata videoIndexMetadata = new VideoIndexMetadata(metadata);
                 indexingInfo = IndexingInfo.completed(videoIndexMetadata.startTime(), videoIndexMetadata.finishTime());
@@ -192,7 +191,7 @@ public class VideoIndexer {
     private void startFullIndexing(Collection<Video> videos) {
         Instant startTime = Instant.now();
 
-        Optional<String> oldIndexName = indexManager.getIndexName(VIDEOS_INDEX);
+        Optional<String> oldIndexName = indexManager.getIndexName(VIDEO_INDEX_NAME);
 
         String indexName = generateVideoIndexName();
         indexManager.create(indexName, VIDEO_INDEX_PROPERTIES);
@@ -204,7 +203,7 @@ public class VideoIndexer {
         indexManager.setMetadata(indexName, videoIndexMetadata.toMetadata());
         log.info("The index metadata has been updated.");
 
-        indexManager.putAlias(indexName, VIDEOS_INDEX);
+        indexManager.putAlias(indexName, VIDEO_INDEX_NAME);
         log.info("The alias has been updated.");
 
         oldIndexName.ifPresent(indexManager::delete);
@@ -225,7 +224,7 @@ public class VideoIndexer {
     }
 
     private static String generateVideoIndexName() {
-        return VIDEOS_INDEX + "_" + Instant.now().toEpochMilli();
+        return VIDEO_INDEX_NAME + "_" + Instant.now().toEpochMilli();
     }
 
     private List<Future<BulkResponse>> bulkIndex(String index, Collection<Video> videos) {
