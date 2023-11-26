@@ -42,9 +42,9 @@ import static net.englab.contextsearcher.repositories.VideoSpecifications.*;
 @RequiredArgsConstructor
 public class VideoIndexer {
 
-    private final static int BULK_SIZE = 10_000;
-    private final static String VIDEOS_INDEX = "videos";
-    private final static Map<String, Property> VIDEO_INDEX_PROPERTIES = Map.of(
+    private static final int BULK_SIZE = 10_000;
+    private static final String VIDEOS_INDEX = "videos";
+    private static final Map<String, Property> VIDEO_INDEX_PROPERTIES = Map.of(
             "video_id", KeywordProperty.of(b -> b)._toProperty(),
             "sentence", TextProperty.of(b -> b)._toProperty(),
             "variety", KeywordProperty.of(b -> b)._toProperty(),

@@ -72,20 +72,28 @@ public class SubtitleSentenceExtractor {
      */
     private RangeMap<Integer, Integer> normalizeRangeMap(RangeMap<Integer, Integer> rangeMap) {
         RangeMap<Integer, Integer> normalizedRangeMap = TreeRangeMap.create();
+
         int offset = -1;
         var mapOfRanges = rangeMap.asMapOfRanges();
-        for (Range<Integer> range : mapOfRanges.keySet()) {
+
+        for (var entry : mapOfRanges.entrySet()) {
+            Range<Integer> range = entry.getKey();
+
             if (offset == -1) {
-                offset = range.lowerEndpoint();
+                offset = entry.getKey().lowerEndpoint();
             }
+
             int recalculatedLowerEndpoint = range.lowerEndpoint() - offset;
             int recalculatedUpperEndpoint = range.upperEndpoint() - offset;
+
             Range<Integer> recalculatedRange = Range.range(
                     recalculatedLowerEndpoint, range.lowerBoundType(),
                     recalculatedUpperEndpoint, range.upperBoundType()
             );
-            normalizedRangeMap.put(recalculatedRange, mapOfRanges.get(range));
+
+            normalizedRangeMap.put(recalculatedRange, entry.getValue());
         }
+
         return normalizedRangeMap;
     }
 }

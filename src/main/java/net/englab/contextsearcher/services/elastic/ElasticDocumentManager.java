@@ -14,6 +14,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Provides operations that are related to Elasticsearch documents
+ * such as indexing and deletion.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

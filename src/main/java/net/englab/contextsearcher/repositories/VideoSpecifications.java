@@ -1,5 +1,7 @@
 package net.englab.contextsearcher.repositories;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.englab.contextsearcher.models.common.EnglishVariety;
 import net.englab.contextsearcher.models.entities.Video;
 import org.springframework.data.jpa.domain.Specification;
@@ -8,6 +10,7 @@ import org.springframework.util.StringUtils;
 /**
  * The collection of specifications for filtering videos when searching in the database.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class VideoSpecifications {
 
     /**

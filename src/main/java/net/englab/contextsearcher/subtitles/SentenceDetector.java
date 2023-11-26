@@ -13,7 +13,7 @@ import java.io.InputStream;
  */
 public class SentenceDetector {
     private static final String MODEL_FILENAME = "/models/opennlp-en-ud-ewt-sentence-1.0-1.9.3.bin";
-    private final SentenceDetectorME sentenceDetector;
+    private final SentenceDetectorME sentenceDetectorMe;
 
     @SneakyThrows
     public SentenceDetector() {
@@ -22,7 +22,7 @@ public class SentenceDetector {
                 throw new RuntimeException("Cannot load a model for sentence detection.");
             }
             SentenceModel model = new SentenceModel(inputStream);
-            sentenceDetector = new SentenceDetectorME(model);
+            sentenceDetectorMe = new SentenceDetectorME(model);
         }
     }
 
@@ -34,6 +34,6 @@ public class SentenceDetector {
      *          about where the detected sentence begins and ends.
      */
     public Span[] detect(String text) {
-        return sentenceDetector.sentPosDetect(text);
+        return sentenceDetectorMe.sentPosDetect(text);
     }
 }

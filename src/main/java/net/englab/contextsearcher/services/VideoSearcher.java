@@ -32,7 +32,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class VideoSearcher {
 
-    private final static String VIDEOS_INDEX = "videos";
+    private static final String VIDEOS_INDEX = "videos";
 
     private final ElasticsearchClient elasticsearchClient;
     private final VideoStorage videoStorage;
