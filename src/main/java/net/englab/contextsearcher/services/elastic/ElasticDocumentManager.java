@@ -5,6 +5,7 @@ import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.englab.contextsearcher.exceptions.ElasticOperationException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -50,8 +51,7 @@ public class ElasticDocumentManager {
             );
             return CompletableFuture.completedFuture(response);
         } catch (IOException e) {
-            log.error("An exception occurred while indexing documents", e);
-            throw new RuntimeException(e);
+            throw new ElasticOperationException("An exception occurred while indexing documents", e);
         }
     }
 
@@ -74,8 +74,7 @@ public class ElasticDocumentManager {
                     )
             );
         } catch (IOException e) {
-            log.error("An exception occurred during document removal", e);
-            throw new RuntimeException(e);
+            throw new ElasticOperationException("An exception occurred during document removal", e);
         }
     }
 }

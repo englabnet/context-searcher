@@ -11,6 +11,7 @@ import com.google.common.collect.RangeMap;
 import com.google.common.collect.TreeRangeMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.englab.contextsearcher.exceptions.ElasticOperationException;
 import net.englab.contextsearcher.models.elastic.VideoFragmentDocument;
 import net.englab.contextsearcher.models.common.EnglishVariety;
 import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
@@ -67,19 +68,18 @@ public class VideoSearcher {
                     .index(VIDEO_INDEX_NAME)
                     .from(from)
                     .size(size)
-                    .query(buildVideoQuery(phrase, variety)._toQuery())
+                    .query(buildSearchQuery(phrase, variety)._toQuery())
                     .highlight(h -> h
                             .fields(SENTENCE, f -> f
                                     .numberOfFragments(0)
                             )
                     ), VideoFragmentDocument.class);
         } catch (IOException e) {
-            log.error("An exception occurred during video search", e);
-            throw new RuntimeException(e);
+            throw new ElasticOperationException("An exception occurred during video search", e);
         }
     }
 
-    private static BoolQuery buildVideoQuery(String phrase, EnglishVariety variety) {
+    private static BoolQuery buildSearchQuery(String phrase, EnglishVariety variety) {
         BoolQuery.Builder builder = new BoolQuery.Builder()
                 .must(m -> m.matchPhrase(p -> p.field(SENTENCE).query(phrase)));
         if (variety != EnglishVariety.ALL) {

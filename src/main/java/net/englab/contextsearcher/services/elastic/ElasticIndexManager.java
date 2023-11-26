@@ -9,6 +9,7 @@ import co.elastic.clients.elasticsearch.indices.get_mapping.IndexMappingRecord;
 import co.elastic.clients.json.JsonData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.englab.contextsearcher.exceptions.ElasticOperationException;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -38,8 +39,7 @@ public class ElasticIndexManager {
                     .exists(b -> b.index(indexName));
             return !response.value();
         } catch (IOException e) {
-            log.error("An exception occurred while checking the existence of an index", e);
-            throw new RuntimeException(e);
+            throw new ElasticOperationException("An exception occurred while checking the existence of an index", e);
         }
     }
 
@@ -62,8 +62,7 @@ public class ElasticIndexManager {
                         );
             }
         } catch (IOException e) {
-            log.error("An exception occurred during index creation", e);
-            throw new RuntimeException(e);
+            throw new ElasticOperationException("An exception occurred during index creation", e);
         }
     }
 
@@ -79,8 +78,7 @@ public class ElasticIndexManager {
                     .ignoreUnavailable(true)
             );
         } catch (IOException e) {
-            log.error("An exception occurred during index deletion", e);
-            throw new RuntimeException(e);
+            throw new ElasticOperationException("An exception occurred during index deletion", e);
         }
     }
 
@@ -104,8 +102,7 @@ public class ElasticIndexManager {
                     .map(TypeMapping::meta)
                     .orElse(Map.of());
         } catch (IOException e) {
-            log.error("An exception occurred while getting metadata", e);
-            throw new RuntimeException(e);
+            throw new ElasticOperationException("An exception occurred while getting metadata", e);
         }
     }
 
@@ -128,8 +125,7 @@ public class ElasticIndexManager {
                     .meta(metadata)
             );
         } catch (IOException e) {
-            log.error("An exception occurred while setting metadata", e);
-            throw new RuntimeException(e);
+            throw new ElasticOperationException("An exception occurred while setting metadata", e);
         }
     }
 
@@ -144,8 +140,7 @@ public class ElasticIndexManager {
             elasticsearchClient.indices()
                     .putAlias(a -> a.index(index).name(alias));
         } catch (IOException e) {
-            log.error("An exception occurred while setting an alias", e);
-            throw new RuntimeException(e);
+            throw new ElasticOperationException("An exception occurred while setting an alias", e);
         }
     }
 
@@ -164,8 +159,7 @@ public class ElasticIndexManager {
             return response.result().keySet().stream()
                     .findAny();
         } catch (IOException e) {
-            log.error("An exception occurred while getting an index name", e);
-            throw new RuntimeException(e);
+            throw new ElasticOperationException("An exception occurred while getting an index name", e);
         }
     }
 }
