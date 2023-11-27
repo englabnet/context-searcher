@@ -235,7 +235,7 @@ public class VideoIndexer {
             for (SubtitleSentence sentence : sentences) {
                 VideoFragmentDocument doc = new VideoFragmentDocument(
                         video.getVideoId(),
-                        video.getVariety().name(),
+                        video.getVariety(),
                         sentence.text(),
                         sentence.subtitleRangeMap()
                 );

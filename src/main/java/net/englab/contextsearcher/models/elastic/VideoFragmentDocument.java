@@ -5,6 +5,7 @@ import com.google.common.collect.RangeMap;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.englab.contextsearcher.models.common.EnglishVariety;
 
 /**
  * Represents a video fragment stored in Elasticsearch.
@@ -23,7 +24,7 @@ public class VideoFragmentDocument {
     /**
      * The variety of English that is used in the video fragment.
      */
-    private String variety;
+    private EnglishVariety variety;
 
     /**
      * The text of the sentence.
