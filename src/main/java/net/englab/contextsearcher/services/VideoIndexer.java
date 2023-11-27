@@ -237,7 +237,8 @@ public class VideoIndexer {
                         video.getVideoId(),
                         video.getVariety().name(),
                         sentence.text(),
-                        rangesToMap(sentence.subtitleRangeMap()));
+                        sentence.subtitleRangeMap()
+                );
                 if (docs.size() >= BULK_SIZE) {
                     futures.add(documentManager.index(index, docs));
                     docs = new ArrayList<>();
@@ -249,10 +250,5 @@ public class VideoIndexer {
             futures.add(documentManager.index(index, docs));
         }
         return futures;
-    }
-
-    private static Map<String, Integer> rangesToMap(RangeMap<Integer, Integer> ranges) {
-        return ranges.asMapOfRanges().entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue));
     }
 }

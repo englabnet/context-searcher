@@ -1,11 +1,10 @@
 package net.englab.contextsearcher.models.elastic;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.RangeMap;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
 
 /**
  * Represents a video fragment stored in Elasticsearch.
@@ -39,5 +38,5 @@ public class VideoFragmentDocument {
      * @see net.englab.contextsearcher.models.subtitles.SubtitleSentence
      */
     @JsonProperty("subtitle_blocks")  // TODO: rename it to subtitle_range_map
-    private Map<String, Integer> sentenceRangeMap;
+    private RangeMap<Integer, Integer> sentenceRangeMap;
 }

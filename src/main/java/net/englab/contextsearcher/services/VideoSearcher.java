@@ -6,9 +6,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
 import co.elastic.clients.elasticsearch.core.search.TotalHits;
-import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
-import com.google.common.collect.TreeRangeMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.englab.contextsearcher.exceptions.ElasticOperationException;
@@ -22,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static net.englab.contextsearcher.elastic.VideoIndexProperties.*;
@@ -89,7 +86,7 @@ public class VideoSearcher {
     }
 
     /**
-     * Builds a VideoFragments based on the Elasticsearch response.
+     * Builds a VideoFragment based on the Elasticsearch response.
      */
     private VideoFragment buildVideoFragment(Hit<VideoFragmentDocument> hit) {
         VideoFragmentDocument doc = hit.source();
@@ -97,13 +94,7 @@ public class VideoSearcher {
             throw new IllegalStateException("Video fragment cannot be null");
         }
 
-        List<SubtitleEntry> subtitles = videoStorage.findSubtitlesByVideoId(doc.getVideoId());
-
-        String highlight = hit.highlight().get(SENTENCE).get(0);
-
-        // elastic wraps highlighted text in <em> and </em> tags
-        String[] textParts = highlight.split("<em>|</em>");
-        RangeMap<Integer, Integer> sentenceRangeMap = mapToRanges(doc.getSentenceRangeMap());
+        RangeMap<Integer, Integer> sentenceRangeMap = doc.getSentenceRangeMap();
 
         Integer firstEntryIndex = sentenceRangeMap.get(0);
         Integer lastEntryIndex = sentenceRangeMap.get(doc.getSentence().length() - 1);
@@ -114,8 +105,14 @@ public class VideoSearcher {
             );
         }
 
+        List<SubtitleEntry> subtitles = videoStorage.findSubtitlesByVideoId(doc.getVideoId());
+
         // here, we find all the subtitle entries that contain our sentence
         List<SubtitleEntry> relevantSubtitleEntries = subtitles.subList(firstEntryIndex, lastEntryIndex + 1);
+
+        // elastic wraps highlighted text in <em> and </em> tags
+        String highlight = hit.highlight().get(SENTENCE).get(0);
+        String[] textParts = highlight.split("<em>|</em>");
 
         SubtitleHighlighter.highlight(doc.getSentence(), textParts, relevantSubtitleEntries);
 
@@ -127,18 +124,5 @@ public class VideoSearcher {
         }
 
         return new VideoFragment(doc.getVideoId(), subtitleEntryIndex, subtitles);
-    }
-
-    /**
-     * Converts a range map from Elasticsearch to a guava range map.
-     */
-    private RangeMap<Integer, Integer> mapToRanges(Map<String, Integer> map) {
-        RangeMap<Integer, Integer> ranges = TreeRangeMap.create();
-        map.forEach((key, value) -> {
-            String strRange = key.substring(1, key.length() - 1);
-            String[] range = strRange.split("\\.\\.");
-            ranges.put(Range.closed(Integer.valueOf(range[0]), Integer.valueOf(range[1])), value);
-        });
-        return ranges;
     }
 }
