@@ -2,61 +2,78 @@ package net.englab.contextsearcher.subtitles;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import net.englab.contextsearcher.exceptions.HighlightingException;
 import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * A class that performs text highlighting in subtitles.
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SubtitleHighlighter {
 
     /**
-     * This method modifies subtitles to highlight the text.
+     * Locates the highlighted text from Elasticsearch in the subtitles and then highlight it.
      *
-     * @param sentence the sentence from elastic
-     * @param parts the highlighted text (even-numbered elements are highlighted)
-     * @param entries the subtitle entries where the sentence appears. This param will be modified.
+     * @param highlightedParts  the highlighted text from Elasticsearch
+     * @param subtitleEntries   a part of subtitle entries where the text needs to be highlighted.
+     *                          This parameter will be updated by the method.
+     * @throws HighlightingException if an unexpected error occurs during highlighting
      */
-    public static void highlight(String sentence, String[] parts, List<SubtitleEntry> entries) {
-        String originalText = entries.stream()
+    public static void highlight(String[] highlightedParts, List<SubtitleEntry> subtitleEntries) {
+        String highlightedSentence = String.join("", highlightedParts);
+
+        String subtitleText = subtitleEntries.stream()
                 .map(entry -> entry.getText().get(0))
+                .filter(text -> !text.isBlank())
                 .collect(Collectors.joining(" "));
 
-        int offset = originalText.indexOf(sentence);
-        if (offset == -1) {
-            throw new RuntimeException("Cannot find the highlighted text in the subtitles.");
+        int sentencePosition = subtitleText.indexOf(highlightedSentence);
+        if (sentencePosition == -1) {
+            throw new HighlightingException("Cannot find the highlighted sentence in the subtitles");
         }
 
-        int p = 0;
-        int endIndex = offset + parts[p].length();
-        for (SubtitleEntry entry : entries) {
-            String line = entry.getText().get(0);
+        int partIndex = 0;
+        int endPosition = sentencePosition + highlightedParts[0].length();
 
-            // we want to skip any empty lines as they break highlighting
-            if (line.isEmpty()) continue;
+        for (int entryIndex = 0; entryIndex < subtitleEntries.size(); entryIndex++) {
+            SubtitleEntry currentEntry = subtitleEntries.get(entryIndex);
+            String entryText = currentEntry.getText().get(0);
 
-            // skip lines until we don't find the one where the text is highlighted
-            if (endIndex >= line.length()) {
-                endIndex -= line.length() + 1; // length + a space character
+            // there's no need to process entries with no text
+            if (entryText.isEmpty()) {
                 continue;
             }
 
-            List<String> result = new ArrayList<>();
-            int beginIndex = 0;
-            for (; p < parts.length - 1 && endIndex <= line.length(); p++) {
-                result.add(line.substring(beginIndex, endIndex));
-                beginIndex = endIndex;
-                endIndex += parts[p + 1].length();
+            // skip subtitle entries until we find the one where we have the highlighted word
+            if (endPosition >= entryText.length()) {
+                endPosition -= entryText.length() + 1; // length + a space character
+                continue;
             }
-            String lastPart = line.substring(beginIndex);
+
+            List<String> highlightedEntryText = new ArrayList<>();
+
+            // try to split the current entry text
+            int startPosition = 0;
+            for (; partIndex < highlightedParts.length - 1 && endPosition <= entryText.length(); partIndex++) {
+                String substring = entryText.substring(startPosition, endPosition);
+                highlightedEntryText.add(substring);
+                startPosition = endPosition;
+                endPosition += highlightedParts[partIndex + 1].length();
+            }
+
+            // add the tail
+            String lastPart = entryText.substring(startPosition);
             if (!lastPart.isBlank()) {
-                result.add(lastPart);
+                highlightedEntryText.add(lastPart);
             }
 
-            endIndex -= line.length() + 1;
+            endPosition -= entryText.length() + 1;
 
-            entry.setText(result);
+            currentEntry.setText(highlightedEntryText);
         }
     }
 }

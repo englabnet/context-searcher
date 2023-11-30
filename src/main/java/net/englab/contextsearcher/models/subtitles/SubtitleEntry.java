@@ -9,7 +9,6 @@ import java.util.List;
 /**
  * Represents a subtitle entry of a video.
  */
-// TODO: turn it into a record
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

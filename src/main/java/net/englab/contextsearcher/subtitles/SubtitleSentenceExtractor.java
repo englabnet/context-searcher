@@ -41,7 +41,9 @@ public class SubtitleSentenceExtractor {
             int textLength = stringJoiner.length();
             textRangeMap.put(Range.closedOpen(textLength, textLength + entryText.length() + 1), srtEntryIndex);
 
-            stringJoiner.add(entryText);
+            if (!entryText.isBlank()) {
+                stringJoiner.add(entryText);
+            }
 
             srtEntryIndex++;
         }

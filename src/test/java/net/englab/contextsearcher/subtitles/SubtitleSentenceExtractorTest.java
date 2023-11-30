@@ -222,13 +222,12 @@ class SubtitleSentenceExtractorTest {
 
         assertEquals(1, sentences.size());
         SubtitleSentence sentence = sentences.get(0);
-        String expectedText = "when Doctor Who returns in 2010...\"  \"...it won't be with me.\"";
+        String expectedText = "when Doctor Who returns in 2010...\" \"...it won't be with me.\"";
         assertEquals(expectedText, sentence.text());
         assertEquals(0, sentence.subtitleRangeMap().get(0));
         assertEquals(0, sentence.subtitleRangeMap().get(34));
-        assertEquals(1, sentence.subtitleRangeMap().get(35));
-        assertEquals(2, sentence.subtitleRangeMap().get(36));
-        assertEquals(2, sentence.subtitleRangeMap().get(61));
-        assertNull(sentence.subtitleRangeMap().get(62));
+        assertEquals(2, sentence.subtitleRangeMap().get(35));
+        assertEquals(2, sentence.subtitleRangeMap().get(60));
+        assertNull(sentence.subtitleRangeMap().get(61));
     }
 }

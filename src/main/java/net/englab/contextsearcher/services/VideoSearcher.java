@@ -107,14 +107,14 @@ public class VideoSearcher {
 
         List<SubtitleEntry> subtitles = videoStorage.findSubtitlesByVideoId(doc.getVideoId());
 
-        // here, we find all the subtitle entries that contain our sentence
+        // here, we find all the subtitle entries that should contain our highlighted phrase
         List<SubtitleEntry> relevantSubtitleEntries = subtitles.subList(firstEntryIndex, lastEntryIndex + 1);
 
         // elastic wraps highlighted text in <em> and </em> tags
         String highlight = hit.highlight().get(SENTENCE).get(0);
         String[] textParts = highlight.split("<em>|</em>");
 
-        SubtitleHighlighter.highlight(doc.getSentence(), textParts, relevantSubtitleEntries);
+        SubtitleHighlighter.highlight(textParts, relevantSubtitleEntries);
 
         int firstHighlightPosition = textParts[0].length();
         Integer subtitleEntryIndex = sentenceRangeMap.get(firstHighlightPosition);
