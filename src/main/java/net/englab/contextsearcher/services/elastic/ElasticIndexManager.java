@@ -37,7 +37,7 @@ public class ElasticIndexManager {
         try {
             var response = elasticsearchClient.indices()
                     .exists(b -> b.index(indexName));
-            return !response.value();
+            return response.value();
         } catch (IOException e) {
             throw new ElasticOperationException("An exception occurred while checking the existence of an index", e);
         }
