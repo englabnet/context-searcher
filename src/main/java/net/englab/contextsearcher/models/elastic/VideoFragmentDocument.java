@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.englab.contextsearcher.models.common.EnglishVariety;
 
+import static net.englab.contextsearcher.elastic.VideoIndexProperties.*;
+
 /**
  * Represents a video fragment stored in Elasticsearch.
  * A video fragment holds only one sentence of text.
@@ -15,21 +17,31 @@ import net.englab.contextsearcher.models.common.EnglishVariety;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VideoFragmentDocument {
+
     /**
      * The YouTube video ID.
      */
-    @JsonProperty("video_id")
+    @JsonProperty(YOUTUBE_VIDEO_ID)
     private String videoId;
 
     /**
      * The variety of English that is used in the video fragment.
      */
+    @JsonProperty(ENGLISH_VARIETY)
     private EnglishVariety variety;
 
     /**
      * The text of the sentence.
      */
+    @JsonProperty(SENTENCE)
     private String sentence;
+
+    /**
+     * The position where the sentence starts in the original subtitle entry.
+     * (It is used for highlighting)
+     */
+    @JsonProperty(SENTENCE_POSITION)
+    private int sentencePosition;
 
     /**
      * A range map associating character indices within the sentence to corresponding
@@ -38,6 +50,11 @@ public class VideoFragmentDocument {
      * For simplicity, it stores ranges as strings.
      * @see net.englab.contextsearcher.models.subtitles.SubtitleSentence
      */
-    @JsonProperty("subtitle_blocks")  // TODO: rename it to subtitle_range_map
+    @JsonProperty("sentence_range_map")
     private RangeMap<Integer, Integer> sentenceRangeMap;
+
+    // TODO: remove this after reindexing
+    @JsonProperty(SENTENCE_RANGE_MAP)
+    @Deprecated
+    private RangeMap<Integer, Integer> subtitleBlocks;
 }

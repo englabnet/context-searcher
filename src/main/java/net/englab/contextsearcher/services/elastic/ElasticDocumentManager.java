@@ -66,6 +66,7 @@ public class ElasticDocumentManager {
         try {
             elasticsearchClient.deleteByQuery(d -> d
                     .index(indexName)
+                    .ignoreUnavailable(true)
                     .query(q -> q
                             .term(t -> t
                                     .field(fieldName)

@@ -30,7 +30,7 @@ class SubtitleHighlighterTest {
                 new SubtitleEntry(0.0, 0.0, List.of("blue shifted all the way from the microwave to visible red light. Over the"))
         );
 
-        SubtitleHighlighter.highlight(parts, entries);
+        SubtitleHighlighter.highlight(parts, 35, entries);
 
         List<SubtitleEntry> expectedEntries = List.of(
                 new SubtitleEntry(0.0, 0.0, List.of("your Lorentz factor by now is 650. And ", "the")),
@@ -57,7 +57,7 @@ class SubtitleHighlighterTest {
                 new SubtitleEntry(0.0, 0.0, List.of("were soon to become a major military importance."))
         );
 
-        SubtitleHighlighter.highlight(parts, entries);
+        SubtitleHighlighter.highlight(parts, 0, entries);
 
         List<SubtitleEntry> expectedEntries = List.of(
                 new SubtitleEntry(0.0, 0.0, List.of("'I say chaps last one to arrive in Manchester has to telephone the Queen and a blow raspberry'")),

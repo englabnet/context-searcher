@@ -9,7 +9,7 @@ import opennlp.tools.util.Span;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
+import java.util.Objects;
 
 /**
  * A class that is used to extract sentences from subtitles in the SRT format.
@@ -27,28 +27,32 @@ public class SubtitleSentenceExtractor {
     public List<SubtitleSentence> extract(String srt) {
         SrtSubtitles srtSubtitles = new SrtSubtitles(srt);
 
-        StringJoiner stringJoiner = new StringJoiner(" ");
+        StringBuilder stringBuilder = new StringBuilder();
 
         // character position -> SRT entry index
         // the range map shows in which SRT entry a specific piece of text appears
         RangeMap<Integer, Integer> textRangeMap = TreeRangeMap.create();
 
         // concatenate all the text into one string and build a range map for it
-        int srtEntryIndex = 0;
-        for (SrtEntry srtEntry : srtSubtitles) {
+        for (int entryIndex = 0; entryIndex < srtSubtitles.size(); entryIndex++) {
+            SrtEntry srtEntry = srtSubtitles.get(entryIndex);
+
+            int lower = stringBuilder.length();
+
             String entryText = String.join(" ", srtEntry.text());
-
-            int textLength = stringJoiner.length();
-            textRangeMap.put(Range.closedOpen(textLength, textLength + entryText.length() + 1), srtEntryIndex);
-
             if (!entryText.isBlank()) {
-                stringJoiner.add(entryText);
+                stringBuilder.append(entryText);
+                if (entryIndex < srtSubtitles.size() - 1) {
+                    stringBuilder.append(" ");
+                }
             }
 
-            srtEntryIndex++;
+            int upper = stringBuilder.length();
+
+            textRangeMap.put(Range.closedOpen(lower, upper), entryIndex);
         }
 
-        String text = stringJoiner.toString();
+        String text = stringBuilder.toString();
 
         Span[] spans = sentenceDetector.detect(text);
 
@@ -60,7 +64,9 @@ public class SubtitleSentenceExtractor {
             Range<Integer> sentenceRange = Range.closedOpen(span.getStart(), span.getEnd());
             RangeMap<Integer, Integer> sentenceRangeMap = normalizeRangeMap(textRangeMap.subRangeMap(sentenceRange));
 
-            SubtitleSentence sentence = new SubtitleSentence(sentenceText, sentenceRangeMap);
+            int sentencePosition = findSentencePosition(textRangeMap, span);
+
+            SubtitleSentence sentence = new SubtitleSentence(sentenceText, sentencePosition, sentenceRangeMap);
             sentences.add(sentence);
         }
 
@@ -72,7 +78,7 @@ public class SubtitleSentenceExtractor {
      * For example, if we have the following range map: [36..50) -> 0, [50..72) -> 1
      * The normalised range map will be: [0..14) -> 0, [14..36) -> 1
      */
-    private RangeMap<Integer, Integer> normalizeRangeMap(RangeMap<Integer, Integer> rangeMap) {
+    private static RangeMap<Integer, Integer> normalizeRangeMap(RangeMap<Integer, Integer> rangeMap) {
         RangeMap<Integer, Integer> normalizedRangeMap = TreeRangeMap.create();
 
         int offset = -1;
@@ -97,5 +103,20 @@ public class SubtitleSentenceExtractor {
         }
 
         return normalizedRangeMap;
+    }
+
+    /**
+     * Calculates the position of the given sentence in its SRT entry.
+     */
+    private static int findSentencePosition(RangeMap<Integer, Integer> textRangeMap, Span span) {
+        var entry = textRangeMap.getEntry(span.getStart());
+        Objects.requireNonNull(entry);
+
+        int lowerEndpoint = entry.getKey().lowerEndpoint();
+        int sentencePosition = 0;
+        if (lowerEndpoint < span.getStart()) {
+            sentencePosition = span.getStart() - lowerEndpoint;
+        }
+        return sentencePosition;
     }
 }

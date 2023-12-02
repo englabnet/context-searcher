@@ -94,7 +94,7 @@ public class VideoSearcher {
             throw new IllegalStateException("Video fragment cannot be null");
         }
 
-        RangeMap<Integer, Integer> sentenceRangeMap = doc.getSentenceRangeMap();
+        RangeMap<Integer, Integer> sentenceRangeMap = doc.getSubtitleBlocks();
 
         Integer firstEntryIndex = sentenceRangeMap.get(0);
         Integer lastEntryIndex = sentenceRangeMap.get(doc.getSentence().length() - 1);
@@ -114,7 +114,9 @@ public class VideoSearcher {
         String highlight = hit.highlight().get(SENTENCE).get(0);
         String[] textParts = highlight.split("<em>|</em>");
 
-        SubtitleHighlighter.highlight(textParts, relevantSubtitleEntries);
+        int sentencePosition = doc.getSentencePosition();
+
+        SubtitleHighlighter.highlight(textParts, sentencePosition, relevantSubtitleEntries);
 
         int firstHighlightPosition = textParts[0].length();
         Integer subtitleEntryIndex = sentenceRangeMap.get(firstHighlightPosition);

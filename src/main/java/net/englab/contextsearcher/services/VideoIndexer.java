@@ -1,9 +1,6 @@
 package net.englab.contextsearcher.services;
 
-import co.elastic.clients.elasticsearch._types.mapping.KeywordProperty;
-import co.elastic.clients.elasticsearch._types.mapping.ObjectProperty;
-import co.elastic.clients.elasticsearch._types.mapping.Property;
-import co.elastic.clients.elasticsearch._types.mapping.TextProperty;
+import co.elastic.clients.elasticsearch._types.mapping.*;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.json.JsonData;
 import lombok.RequiredArgsConstructor;
@@ -43,9 +40,12 @@ public class VideoIndexer {
     private static final int BULK_SIZE = 10_000;
     private static final Map<String, Property> VIDEO_INDEX_PROPERTIES = Map.of(
             YOUTUBE_VIDEO_ID, KeywordProperty.of(b -> b)._toProperty(),
-            SENTENCE, TextProperty.of(b -> b)._toProperty(),
             ENGLISH_VARIETY, KeywordProperty.of(b -> b)._toProperty(),
-            SUBTITLE_RANGE_MAP, ObjectProperty.of(b -> b.enabled(false))._toProperty()
+            SENTENCE, TextProperty.of(b -> b)._toProperty(),
+            SENTENCE_POSITION, IntegerNumberProperty.of(b -> b)._toProperty(),
+            "sentence_range_map", ObjectProperty.of(b -> b.enabled(false))._toProperty(),
+            // TODO: remove this property
+            SENTENCE_RANGE_MAP, ObjectProperty.of(b -> b.enabled(false))._toProperty()
     );
 
     private final VideoStorage videoStorage;
@@ -209,7 +209,7 @@ public class VideoIndexer {
 
     @SneakyThrows
     private void indexVideos(String indexName, Collection<Video> videos) {
-        if (!indexManager.exists(VIDEO_INDEX_NAME)) {
+        if (!indexManager.exists(indexName)) {
             return;
         }
         List<Future<BulkResponse>> futures = bulkIndex(indexName, videos);
@@ -237,7 +237,9 @@ public class VideoIndexer {
                         video.getVideoId(),
                         video.getVariety(),
                         sentence.text(),
-                        sentence.subtitleRangeMap()
+                        sentence.position(),
+                        sentence.rangeMap(),
+                        sentence.rangeMap()
                 );
                 if (docs.size() >= BULK_SIZE) {
                     futures.add(documentManager.index(index, docs));

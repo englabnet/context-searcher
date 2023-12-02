@@ -7,7 +7,6 @@ import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * A class that performs text highlighting in subtitles.
@@ -16,26 +15,15 @@ import java.util.stream.Collectors;
 public class SubtitleHighlighter {
 
     /**
-     * Locates the highlighted text from Elasticsearch in the subtitles and then highlight it.
+     * Applies the Elasticsearch highlighting to the given subtitles.
      *
      * @param highlightedParts  the highlighted text from Elasticsearch
+     * @param sentencePosition  the position where the sentence starts in the original subtitle entry
      * @param subtitleEntries   a part of subtitle entries where the text needs to be highlighted.
      *                          This parameter will be updated by the method.
      * @throws HighlightingException if an unexpected error occurs during highlighting
      */
-    public static void highlight(String[] highlightedParts, List<SubtitleEntry> subtitleEntries) {
-        String highlightedSentence = String.join("", highlightedParts);
-
-        String subtitleText = subtitleEntries.stream()
-                .map(entry -> entry.getText().get(0))
-                .filter(text -> !text.isBlank())
-                .collect(Collectors.joining(" "));
-
-        int sentencePosition = subtitleText.indexOf(highlightedSentence);
-        if (sentencePosition == -1) {
-            throw new HighlightingException("Cannot find the highlighted sentence in the subtitles");
-        }
-
+    public static void highlight(String[] highlightedParts, int sentencePosition, List<SubtitleEntry> subtitleEntries) {
         int partIndex = 0;
         int endPosition = sentencePosition + highlightedParts[0].length();
 

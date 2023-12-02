@@ -43,15 +43,16 @@ class SubtitleSentenceExtractorTest {
                 "probably since it's fairly straightforward to point at an object, say the word for it, and have the other " +
                 "person understand that’s what you’re talking about.";
         assertEquals(expectedText, sentence.text());
-        assertEquals(0, sentence.subtitleRangeMap().get(0));
-        assertEquals(0, sentence.subtitleRangeMap().get(58));
-        assertEquals(1, sentence.subtitleRangeMap().get(59));
-        assertEquals(1, sentence.subtitleRangeMap().get(130));
-        assertEquals(2, sentence.subtitleRangeMap().get(131));
-        assertEquals(2, sentence.subtitleRangeMap().get(174));
-        assertEquals(3, sentence.subtitleRangeMap().get(175));
-        assertEquals(3, sentence.subtitleRangeMap().get(245));
-        assertNull(sentence.subtitleRangeMap().get(246));
+        assertEquals(0, sentence.position());
+        assertEquals(0, sentence.rangeMap().get(0));
+        assertEquals(0, sentence.rangeMap().get(59));
+        assertEquals(1, sentence.rangeMap().get(60));
+        assertEquals(1, sentence.rangeMap().get(131));
+        assertEquals(2, sentence.rangeMap().get(132));
+        assertEquals(2, sentence.rangeMap().get(175));
+        assertEquals(3, sentence.rangeMap().get(176));
+        assertEquals(3, sentence.rangeMap().get(245));
+        assertNull(sentence.rangeMap().get(246));
     }
 
     @Test
@@ -70,28 +71,36 @@ class SubtitleSentenceExtractorTest {
         List<SubtitleSentence> sentences = sentenceExtractor.extract(text);
 
         assertEquals(4, sentences.size());
+
         SubtitleSentence sentence = sentences.get(0);
         assertEquals("Hello world!", sentence.text());
-        assertEquals(0, sentence.subtitleRangeMap().get(0));
-        assertEquals(0, sentence.subtitleRangeMap().get(11));
-        assertNull(sentence.subtitleRangeMap().get(12));
+        assertEquals(0, sentence.position());
+        assertEquals(0, sentence.rangeMap().get(0));
+        assertEquals(0, sentence.rangeMap().get(11));
+        assertNull(sentence.rangeMap().get(12));
+
         sentence = sentences.get(1);
         assertEquals("How are you?", sentence.text());
-        assertEquals(0, sentence.subtitleRangeMap().get(0));
-        assertEquals(0, sentence.subtitleRangeMap().get(11));
-        assertNull(sentence.subtitleRangeMap().get(12));
+        assertEquals(13, sentence.position());
+        assertEquals(0, sentence.rangeMap().get(0));
+        assertEquals(0, sentence.rangeMap().get(11));
+        assertNull(sentence.rangeMap().get(12));
+
         sentence = sentences.get(2);
         assertEquals("I'm fine.", sentence.text());
-        assertEquals(0, sentence.subtitleRangeMap().get(0));
-        assertEquals(0, sentence.subtitleRangeMap().get(8));
-        assertNull(sentence.subtitleRangeMap().get(9));
+        assertEquals(26, sentence.position());
+        assertEquals(0, sentence.rangeMap().get(0));
+        assertEquals(0, sentence.rangeMap().get(8));
+        assertNull(sentence.rangeMap().get(9));
+
         sentence = sentences.get(3);
         assertEquals("This is a test that will catch bugs!", sentence.text());
-        assertEquals(0, sentence.subtitleRangeMap().get(0));
-        assertEquals(0, sentence.subtitleRangeMap().get(13));
-        assertEquals(1, sentence.subtitleRangeMap().get(14));
-        assertEquals(1, sentence.subtitleRangeMap().get(35));
-        assertNull(sentence.subtitleRangeMap().get(36));
+        assertEquals(36, sentence.position());
+        assertEquals(0, sentence.rangeMap().get(0));
+        assertEquals(0, sentence.rangeMap().get(14));
+        assertEquals(1, sentence.rangeMap().get(15));
+        assertEquals(1, sentence.rangeMap().get(35));
+        assertNull(sentence.rangeMap().get(36));
     }
 
     @Test
@@ -116,30 +125,38 @@ class SubtitleSentenceExtractorTest {
         List<SubtitleSentence> sentences = sentenceExtractor.extract(text);
 
         assertEquals(4, sentences.size());
+
         SubtitleSentence sentence = sentences.get(0);
         String expectedText = "The Arabic word /sˤaħ raːʔ/ for \"deserts\" became " +
                 "the English word specifically for the Sahara Desert.";
         assertEquals(expectedText, sentence.text());
-        assertEquals(0, sentence.subtitleRangeMap().get(0));
-        assertEquals(0, sentence.subtitleRangeMap().get(64));
-        assertEquals(1, sentence.subtitleRangeMap().get(65));
-        assertEquals(1, sentence.subtitleRangeMap().get(100));
-        assertNull(sentence.subtitleRangeMap().get(101));
+        assertEquals(0, sentence.position());
+        assertEquals(0, sentence.rangeMap().get(0));
+        assertEquals(0, sentence.rangeMap().get(65));
+        assertEquals(1, sentence.rangeMap().get(66));
+        assertEquals(1, sentence.rangeMap().get(100));
+        assertNull(sentence.rangeMap().get(101));
+
         sentence = sentences.get(1);
+        assertEquals(36, sentence.position());
         assertEquals("So the Desert Desert.", sentence.text());
-        assertEquals(1, sentence.subtitleRangeMap().get(0));
-        assertEquals(1, sentence.subtitleRangeMap().get(20));
-        assertNull(sentence.subtitleRangeMap().get(21));
+        assertEquals(1, sentence.rangeMap().get(0));
+        assertEquals(1, sentence.rangeMap().get(20));
+        assertNull(sentence.rangeMap().get(21));
+
         sentence = sentences.get(2);
         assertEquals("Which keeps happening!", sentence.text());
-        assertEquals(2, sentence.subtitleRangeMap().get(0));
-        assertEquals(2, sentence.subtitleRangeMap().get(21));
-        assertNull(sentence.subtitleRangeMap().get(22));
+        assertEquals(0, sentence.position());
+        assertEquals(2, sentence.rangeMap().get(0));
+        assertEquals(2, sentence.rangeMap().get(21));
+        assertNull(sentence.rangeMap().get(22));
+
         sentence = sentences.get(3);
         assertEquals("Matcha tea is \"powdered tea tea\".", sentence.text());
-        assertEquals(2, sentence.subtitleRangeMap().get(0));
-        assertEquals(2, sentence.subtitleRangeMap().get(32));
-        assertNull(sentence.subtitleRangeMap().get(33));
+        assertEquals(23, sentence.position());
+        assertEquals(2, sentence.rangeMap().get(0));
+        assertEquals(2, sentence.rangeMap().get(32));
+        assertNull(sentence.rangeMap().get(33));
     }
 
     @Test
@@ -171,35 +188,45 @@ class SubtitleSentenceExtractorTest {
         List<SubtitleSentence> sentences = sentenceExtractor.extract(text);
 
         assertEquals(5, sentences.size());
+
         SubtitleSentence sentence = sentences.get(0);
         assertEquals("\"Oooh!", sentence.text());
-        assertEquals(0, sentence.subtitleRangeMap().get(0));
-        assertEquals(0, sentence.subtitleRangeMap().get(5));
-        assertNull(sentence.subtitleRangeMap().get(6));
+        assertEquals(0, sentence.position());
+        assertEquals(0, sentence.rangeMap().get(0));
+        assertEquals(0, sentence.rangeMap().get(5));
+        assertNull(sentence.rangeMap().get(6));
+
         sentence = sentences.get(1);
         assertEquals("And me!\"", sentence.text());
-        assertEquals(0, sentence.subtitleRangeMap().get(0));
-        assertEquals(0, sentence.subtitleRangeMap().get(7));
-        assertNull(sentence.subtitleRangeMap().get(8));
+        assertEquals(7, sentence.position());
+        assertEquals(0, sentence.rangeMap().get(0));
+        assertEquals(0, sentence.rangeMap().get(7));
+        assertNull(sentence.rangeMap().get(8));
+
         sentence = sentences.get(2);
         assertEquals("\"What are you doing there?\"", sentence.text());
-        assertEquals(1, sentence.subtitleRangeMap().get(0));
-        assertEquals(1, sentence.subtitleRangeMap().get(26));
-        assertNull(sentence.subtitleRangeMap().get(27));
+        assertEquals(0, sentence.position());
+        assertEquals(1, sentence.rangeMap().get(0));
+        assertEquals(1, sentence.rangeMap().get(26));
+        assertNull(sentence.rangeMap().get(27));
+
         sentence = sentences.get(3);
         assertEquals("...this wasn’t really the Doctor Who I personally loved.", sentence.text());
-        assertEquals(2, sentence.subtitleRangeMap().get(0));
-        assertEquals(2, sentence.subtitleRangeMap().get(55));
-        assertNull(sentence.subtitleRangeMap().get(56));
+        assertEquals(0, sentence.position());
+        assertEquals(2, sentence.rangeMap().get(0));
+        assertEquals(2, sentence.rangeMap().get(55));
+        assertNull(sentence.rangeMap().get(56));
+
         sentence = sentences.get(4);
         String expectedText = "It was an obvious success, and I appreciated that a new generation were experiencing " +
                 "the Doctor’s adventures, but I was unsure whether it was really for me.";
         assertEquals(expectedText, sentence.text());
-        assertEquals(3, sentence.subtitleRangeMap().get(0));
-        assertEquals(3, sentence.subtitleRangeMap().get(70));
-        assertEquals(4, sentence.subtitleRangeMap().get(71));
-        assertEquals(4, sentence.subtitleRangeMap().get(155));
-        assertNull(sentence.subtitleRangeMap().get(156));
+        assertEquals(0, sentence.position());
+        assertEquals(3, sentence.rangeMap().get(0));
+        assertEquals(3, sentence.rangeMap().get(71));
+        assertEquals(4, sentence.rangeMap().get(72));
+        assertEquals(4, sentence.rangeMap().get(155));
+        assertNull(sentence.rangeMap().get(156));
     }
 
     @Test
@@ -224,10 +251,11 @@ class SubtitleSentenceExtractorTest {
         SubtitleSentence sentence = sentences.get(0);
         String expectedText = "when Doctor Who returns in 2010...\" \"...it won't be with me.\"";
         assertEquals(expectedText, sentence.text());
-        assertEquals(0, sentence.subtitleRangeMap().get(0));
-        assertEquals(0, sentence.subtitleRangeMap().get(34));
-        assertEquals(2, sentence.subtitleRangeMap().get(35));
-        assertEquals(2, sentence.subtitleRangeMap().get(60));
-        assertNull(sentence.subtitleRangeMap().get(61));
+        assertEquals(0, sentence.position());
+        assertEquals(0, sentence.rangeMap().get(0));
+        assertEquals(0, sentence.rangeMap().get(35));
+        assertEquals(2, sentence.rangeMap().get(36));
+        assertEquals(2, sentence.rangeMap().get(60));
+        assertNull(sentence.rangeMap().get(61));
     }
 }

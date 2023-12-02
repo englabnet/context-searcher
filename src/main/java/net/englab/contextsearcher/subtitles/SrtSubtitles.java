@@ -105,4 +105,18 @@ public class SrtSubtitles implements Iterable<SrtEntry> {
     public Stream<SrtEntry> stream() {
         return srtEntries.stream();
     }
+
+    /**
+     * Returns the number of SRT entries.
+     */
+    public int size() {
+        return srtEntries.size();
+    }
+
+    /**
+     * Returns the SRT entry at the specified position.
+     */
+    public SrtEntry get(int i) {
+        return srtEntries.get(i);
+    }
 }
