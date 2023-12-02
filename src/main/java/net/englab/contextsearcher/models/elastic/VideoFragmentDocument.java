@@ -50,11 +50,6 @@ public class VideoFragmentDocument {
      * For simplicity, it stores ranges as strings.
      * @see net.englab.contextsearcher.models.subtitles.SubtitleSentence
      */
-    @JsonProperty("sentence_range_map")
-    private RangeMap<Integer, Integer> sentenceRangeMap;
-
-    // TODO: remove this after reindexing
     @JsonProperty(SENTENCE_RANGE_MAP)
-    @Deprecated
-    private RangeMap<Integer, Integer> subtitleBlocks;
+    private RangeMap<Integer, Integer> sentenceRangeMap;
 }

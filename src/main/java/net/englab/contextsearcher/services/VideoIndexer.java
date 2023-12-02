@@ -43,8 +43,6 @@ public class VideoIndexer {
             ENGLISH_VARIETY, KeywordProperty.of(b -> b)._toProperty(),
             SENTENCE, TextProperty.of(b -> b)._toProperty(),
             SENTENCE_POSITION, IntegerNumberProperty.of(b -> b)._toProperty(),
-            "sentence_range_map", ObjectProperty.of(b -> b.enabled(false))._toProperty(),
-            // TODO: remove this property
             SENTENCE_RANGE_MAP, ObjectProperty.of(b -> b.enabled(false))._toProperty()
     );
 
@@ -238,7 +236,6 @@ public class VideoIndexer {
                         video.getVariety(),
                         sentence.text(),
                         sentence.position(),
-                        sentence.rangeMap(),
                         sentence.rangeMap()
                 );
                 if (docs.size() >= BULK_SIZE) {

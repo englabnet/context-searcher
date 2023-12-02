@@ -94,7 +94,7 @@ public class VideoSearcher {
             throw new IllegalStateException("Video fragment cannot be null");
         }
 
-        RangeMap<Integer, Integer> sentenceRangeMap = doc.getSubtitleBlocks();
+        RangeMap<Integer, Integer> sentenceRangeMap = doc.getSentenceRangeMap();
 
         Integer firstEntryIndex = sentenceRangeMap.get(0);
         Integer lastEntryIndex = sentenceRangeMap.get(doc.getSentence().length() - 1);
