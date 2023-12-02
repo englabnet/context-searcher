@@ -6,7 +6,6 @@ import co.elastic.clients.elasticsearch._types.mapping.Property;
 import co.elastic.clients.elasticsearch._types.mapping.TextProperty;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.json.JsonData;
-import com.google.common.collect.RangeMap;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +28,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import static net.englab.contextsearcher.elastic.VideoIndexProperties.*;
 import static net.englab.contextsearcher.repositories.VideoSpecifications.*;
@@ -78,11 +76,11 @@ public class VideoIndexer {
         });
         Video video = new Video(null, videoId, variety, srt);
         Long id = videoStorage.save(video);
+        log.info("A new video with ID={} has been added", id);
         try {
             indexVideos(VIDEO_INDEX_NAME, List.of(video));
         } catch (Exception e) {
             log.error("Exception occurred during video indexing", e);
-            videoStorage.deleteById(id);
             throw new RuntimeException(e);
         }
     }
@@ -111,7 +109,6 @@ public class VideoIndexer {
                 indexVideos(VIDEO_INDEX_NAME, List.of(video));
             } catch (Exception e) {
                 log.error("Exception occurred during video updating", e);
-                videoStorage.deleteById(id);
                 throw new RuntimeException(e);
             }
         }, () -> {
@@ -212,6 +209,9 @@ public class VideoIndexer {
 
     @SneakyThrows
     private void indexVideos(String indexName, Collection<Video> videos) {
+        if (!indexManager.exists(VIDEO_INDEX_NAME)) {
+            return;
+        }
         List<Future<BulkResponse>> futures = bulkIndex(indexName, videos);
         for (Future<BulkResponse> future : futures) {
             BulkResponse response = future.get();

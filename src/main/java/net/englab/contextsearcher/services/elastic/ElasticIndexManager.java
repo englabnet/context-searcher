@@ -28,12 +28,12 @@ public class ElasticIndexManager {
     private final ElasticsearchClient elasticsearchClient;
 
     /**
-     * Checks if the given index is absent.
+     * Checks if the given index exists.
      *
      * @param indexName the name of the index to check
-     * @return true if the index is not present and false otherwise
+     * @return true if the index is present and false otherwise
      */
-    public boolean isAbsent(String indexName) {
+    public boolean exists(String indexName) {
         try {
             var response = elasticsearchClient.indices()
                     .exists(b -> b.index(indexName));
@@ -51,7 +51,7 @@ public class ElasticIndexManager {
      */
     public void create(String indexName, Map<String, Property> properties) {
         try {
-            if (isAbsent(indexName)) {
+            if (!exists(indexName)) {
                 elasticsearchClient.indices()
                         .create(b -> b
                                 .index(indexName)
@@ -91,7 +91,7 @@ public class ElasticIndexManager {
      */
     public Map<String, JsonData> getMetadata(String indexName) {
         try {
-            if (isAbsent(indexName)) {
+            if (!exists(indexName)) {
                 return Map.of();
             }
             var response = elasticsearchClient.indices()
@@ -152,7 +152,7 @@ public class ElasticIndexManager {
      */
     public Optional<String> getIndexName(String alias) {
         try {
-            if (isAbsent(alias)) {
+            if (!exists(alias)) {
                 return Optional.empty();
             }
             var response = elasticsearchClient.indices().get(b -> b.index(alias));
