@@ -21,8 +21,6 @@ public class SrtSubtitles implements Iterable<SrtEntry> {
     // This pattern is used to replace any unusual separator characters with spaces
     private static final Pattern SEPARATOR_PATTERN = Pattern.compile("[\\p{Z}\\s]");
 
-    // The following pattern is used to remove things like this: [intense music], (noises)
-    private static final Pattern BRACKETS_PATTERN = Pattern.compile("\\s*(\\[.*?]|\\(.*?\\))");
     private final List<SrtEntry> srtEntries;
 
     /**
@@ -66,9 +64,7 @@ public class SrtSubtitles implements Iterable<SrtEntry> {
     private static Optional<String> parseTextLine(String line) {
         if (line != null) {
             String text = SEPARATOR_PATTERN.matcher(line).replaceAll(" ");
-            // TODO: should this class be responsible for this?
-            String result = BRACKETS_PATTERN.matcher(text).replaceAll("").trim();
-            return Optional.of(result);
+            return Optional.of(text);
         }
         return Optional.empty();
     }
@@ -116,7 +112,7 @@ public class SrtSubtitles implements Iterable<SrtEntry> {
     /**
      * Returns the SRT entry at the specified position.
      */
-    public SrtEntry get(int i) {
-        return srtEntries.get(i);
+    public SrtEntry get(int index) {
+        return srtEntries.get(index);
     }
 }

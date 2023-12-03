@@ -18,6 +18,7 @@ import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.services.elastic.ElasticDocumentManager;
 import net.englab.contextsearcher.services.elastic.ElasticIndexManager;
 import net.englab.contextsearcher.subtitles.SubtitleSentenceExtractor;
+import net.englab.contextsearcher.text.TextTransformations;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -231,10 +232,11 @@ public class VideoIndexer {
         for (Video video : videos) {
             List<SubtitleSentence> sentences = sentenceExtractor.extract(video.getSrt());
             for (SubtitleSentence sentence : sentences) {
+                String transformedText = TextTransformations.removeSoundDescriptions(sentence.text());
                 VideoFragmentDocument doc = new VideoFragmentDocument(
                         video.getVideoId(),
                         video.getVariety(),
-                        sentence.text(),
+                        transformedText,
                         sentence.position(),
                         sentence.rangeMap()
                 );
