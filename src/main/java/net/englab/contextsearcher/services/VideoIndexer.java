@@ -131,9 +131,13 @@ public class VideoIndexer {
             throw new IndexingConflictException("A video cannot be removed while an indexing job is running");
         }
         try {
-            videoStorage.findAny(byId(id)).ifPresentOrElse(video ->
-                    documentManager.deleteByFieldValue(VIDEO_INDEX_NAME, YOUTUBE_VIDEO_ID, video.getYoutubeVideoId()),
-            () -> {
+            videoStorage.findAny(byId(id)).ifPresentOrElse(video -> {
+                String youtubeVideoId = video.getYoutubeVideoId();
+                documentManager.deleteByFieldValue(VIDEO_INDEX_NAME, YOUTUBE_VIDEO_ID, youtubeVideoId);
+                indexManager.getIndexName(VIDEO_INDEX_NAME).ifPresent(indexName ->
+                        indexedVideoStorage.delete(indexName, youtubeVideoId)
+                );
+            }, () -> {
                 throw new VideoNotFoundException("The video has not been found and cannot be removed.");
             });
         } catch (Exception e) {
@@ -208,6 +212,9 @@ public class VideoIndexer {
 
         oldIndexName.ifPresent(indexManager::delete);
         log.info("The old index has been removed.");
+
+        indexedVideoStorage.cleanUp(indexName);
+        log.info("Removed stale indexed videos from the database.");
     }
 
     @SneakyThrows

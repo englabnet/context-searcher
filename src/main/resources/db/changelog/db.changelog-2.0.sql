@@ -8,7 +8,7 @@ ALTER TABLE video
 CREATE TABLE IF NOT EXISTS indexed_video (
     id SERIAL NOT NULL PRIMARY KEY,
     index_name VARCHAR NOT NULL,
-    youtube_video_id VARCHAR NOT NULL UNIQUE,
+    youtube_video_id VARCHAR NOT NULL,
     variety VARCHAR NOT NULL,
     subtitles TEXT NOT NULL
 )

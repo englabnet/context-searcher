@@ -23,7 +23,7 @@ public class VideoStorage {
     private final VideoRepository videoRepository;
 
     /**
-     * Saves a new video to the database.
+     * Saves a new video to the storage.
      *
      * @param video the video that needs to be saved
      * @return the unique ID assigned to the saved video
