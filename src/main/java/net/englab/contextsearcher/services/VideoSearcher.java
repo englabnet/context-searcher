@@ -76,7 +76,7 @@ public class VideoSearcher {
     private SearchResponse<VideoFragmentDocument> searchDocuments(String phrase, EnglishVariety variety, int from, int size) {
         try {
             return elasticsearchClient.search(b -> b
-                    .index(VIDEO_INDEX_NAME)
+                    .index(ALIAS)
                     .from(from)
                     .size(size)
                     .query(buildSearchQuery(phrase, variety)._toQuery())

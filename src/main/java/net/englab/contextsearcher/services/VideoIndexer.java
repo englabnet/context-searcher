@@ -81,7 +81,9 @@ public class VideoIndexer {
         Long id = videoStorage.save(video);
         log.info("A new video with ID={} has been added", id);
         try {
-            indexVideos(VIDEO_INDEX_NAME, List.of(video));
+            indexManager.getIndexName(ALIAS).ifPresent(indexName ->
+                    indexVideos(indexName, List.of(video))
+            );
         } catch (Exception e) {
             log.error("Exception occurred during video indexing", e);
             throw new RuntimeException(e);
@@ -107,9 +109,9 @@ public class VideoIndexer {
             video.setVariety(variety);
             video.setSrt(srt);
             videoStorage.save(video);
-            documentManager.deleteByFieldValue(VIDEO_INDEX_NAME, YOUTUBE_VIDEO_ID, video.getYoutubeVideoId());
+            documentManager.deleteByFieldValue(ALIAS, YOUTUBE_VIDEO_ID, video.getYoutubeVideoId());
             try {
-                indexVideos(VIDEO_INDEX_NAME, List.of(video));
+                indexVideos(ALIAS, List.of(video));
             } catch (Exception e) {
                 log.error("Exception occurred during video updating", e);
                 throw new RuntimeException(e);
@@ -133,8 +135,8 @@ public class VideoIndexer {
         try {
             videoStorage.findAny(byId(id)).ifPresentOrElse(video -> {
                 String youtubeVideoId = video.getYoutubeVideoId();
-                documentManager.deleteByFieldValue(VIDEO_INDEX_NAME, YOUTUBE_VIDEO_ID, youtubeVideoId);
-                indexManager.getIndexName(VIDEO_INDEX_NAME).ifPresent(indexName ->
+                documentManager.deleteByFieldValue(ALIAS, YOUTUBE_VIDEO_ID, youtubeVideoId);
+                indexManager.getIndexName(ALIAS).ifPresent(indexName ->
                         indexedVideoStorage.delete(indexName, youtubeVideoId)
                 );
             }, () -> {
@@ -154,7 +156,7 @@ public class VideoIndexer {
      */
     public IndexingInfo getIndexingStatus() {
         if (!isRunning.get()) {
-            Map<String, JsonData> metadata = indexManager.getMetadata(VIDEO_INDEX_NAME);
+            Map<String, JsonData> metadata = indexManager.getMetadata(ALIAS);
             if (!metadata.isEmpty()) {
                 VideoIndexMetadata videoIndexMetadata = new VideoIndexMetadata(metadata);
                 indexingInfo = IndexingInfo.completed(videoIndexMetadata.startTime(), videoIndexMetadata.finishTime());
@@ -195,7 +197,7 @@ public class VideoIndexer {
     private void startFullIndexing(Collection<Video> videos) {
         Instant startTime = Instant.now();
 
-        Optional<String> oldIndexName = indexManager.getIndexName(VIDEO_INDEX_NAME);
+        Optional<String> oldIndexName = indexManager.getIndexName(ALIAS);
 
         String indexName = generateVideoIndexName();
         indexManager.create(indexName, VIDEO_INDEX_PROPERTIES);
@@ -207,7 +209,7 @@ public class VideoIndexer {
         indexManager.setMetadata(indexName, videoIndexMetadata.toMetadata());
         log.info("The index metadata has been updated.");
 
-        indexManager.putAlias(indexName, VIDEO_INDEX_NAME);
+        indexManager.putAlias(indexName, ALIAS);
         log.info("The alias has been updated.");
 
         oldIndexName.ifPresent(indexManager::delete);
@@ -234,10 +236,10 @@ public class VideoIndexer {
     }
 
     private static String generateVideoIndexName() {
-        return VIDEO_INDEX_NAME + "_" + Instant.now().toEpochMilli();
+        return ALIAS + "_" + Instant.now().toEpochMilli();
     }
 
-    private List<Future<BulkResponse>> bulkIndex(String index, Collection<Video> videos) {
+    private List<Future<BulkResponse>> bulkIndex(String indexName, Collection<Video> videos) {
         List<VideoFragmentDocument> docs = new ArrayList<>();
         List<Future<BulkResponse>> futures = new ArrayList<>();
         for (Video video : videos) {
@@ -249,7 +251,9 @@ public class VideoIndexer {
                             b.timeFrame().endTime(),
                             List.of(String.join(" ", b.text())))
                     ).toList();
-            IndexedVideo indexedVideo = new IndexedVideo(null, index, video.getYoutubeVideoId(), video.getVariety(), subtitleEntries);
+            IndexedVideo indexedVideo = new IndexedVideo(
+                    null, indexName, video.getYoutubeVideoId(), video.getVariety(), subtitleEntries
+            );
             indexedVideoStorage.save(indexedVideo);
 
             List<SubtitleSentence> sentences = sentenceExtractor.extract(srtSubtitles);
@@ -263,14 +267,14 @@ public class VideoIndexer {
                         sentence.rangeMap()
                 );
                 if (docs.size() >= BULK_SIZE) {
-                    futures.add(documentManager.index(index, docs));
+                    futures.add(documentManager.index(indexName, docs));
                     docs = new ArrayList<>();
                 }
                 docs.add(doc);
             }
         }
         if (!docs.isEmpty()) {
-            futures.add(documentManager.index(index, docs));
+            futures.add(documentManager.index(indexName, docs));
         }
         return futures;
     }
