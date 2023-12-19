@@ -30,7 +30,7 @@ public class Video {
     /**
      * The YouTube video ID.
      */
-    private String videoId; // TODO: rename it to youtubeVideoId
+    private String youtubeVideoId;
 
     /**
      * The variety of English that is used in the video.

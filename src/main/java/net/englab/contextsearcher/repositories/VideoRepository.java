@@ -16,9 +16,9 @@ public interface VideoRepository extends JpaRepository<Video, Long>, JpaSpecific
     /**
      * Finds a video entity by its YouTube video ID.
      *
-     * @param videoId the YouTube video ID
+     * @param youtubeVideoId the YouTube video ID
      * @return  an Optional containing the found video.
      *          If no video is found, it wil be empty.
      */
-    Optional<Video> findByVideoId(String videoId);
+    Optional<Video> findByYoutubeVideoId(String youtubeVideoId);
 }

@@ -22,7 +22,7 @@ public class VideoFragmentDocument {
      * The YouTube video ID.
      */
     @JsonProperty(YOUTUBE_VIDEO_ID)
-    private String videoId;
+    private String youtubeVideoId;
 
     /**
      * The variety of English that is used in the video fragment.

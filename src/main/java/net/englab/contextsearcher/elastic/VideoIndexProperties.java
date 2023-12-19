@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class VideoIndexProperties {
     public static final String VIDEO_INDEX_NAME = "videos";
 
-    public static final String YOUTUBE_VIDEO_ID = "video_id";
+    public static final String YOUTUBE_VIDEO_ID = "youtube_video_id";
     public static final String ENGLISH_VARIETY = "variety";
     public static final String SENTENCE = "sentence";
     public static final String SENTENCE_POSITION = "sentence_position";

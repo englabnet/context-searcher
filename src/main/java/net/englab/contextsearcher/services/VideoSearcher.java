@@ -105,7 +105,7 @@ public class VideoSearcher {
             );
         }
 
-        List<SubtitleEntry> subtitles = videoStorage.findSubtitlesByVideoId(doc.getVideoId());
+        List<SubtitleEntry> subtitles = videoStorage.findSubtitlesByVideoId(doc.getYoutubeVideoId());
 
         // here, we find all the subtitle entries that should contain our highlighted phrase
         List<SubtitleEntry> relevantSubtitleEntries = subtitles.subList(firstEntryIndex, lastEntryIndex + 1);
@@ -125,6 +125,6 @@ public class VideoSearcher {
             throw new IllegalStateException("Failed to find the subtitle entry index. Sentence range map is not correct.");
         }
 
-        return new VideoFragment(doc.getVideoId(), subtitleEntryIndex, subtitles);
+        return new VideoFragment(doc.getYoutubeVideoId(), subtitleEntryIndex, subtitles);
     }
 }

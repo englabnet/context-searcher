@@ -30,14 +30,14 @@ public class VideoSpecifications {
     /**
      * Creates a Specification for filtering videos based on their YouTube video ID.
      *
-     * @param videoId the YouTube video ID to filter by. Can be null or empty.
+     * @param youtubeVideoId the YouTube video ID to filter by. Can be null or empty.
      * @return a Specification object to be used in a query.
      *          Returns a conjunction (no-op) if the YouTube video ID is null or empty.
      */
-    public static Specification<Video> byVideoId(String videoId) {
+    public static Specification<Video> byYoutubeVideoId(String youtubeVideoId) {
         return (root, query, builder) -> {
-            if (!StringUtils.hasText(videoId)) return builder.conjunction();
-            return builder.equal(root.get("videoId"), videoId);
+            if (!StringUtils.hasText(youtubeVideoId)) return builder.conjunction();
+            return builder.equal(root.get("youtubeVideoId"), youtubeVideoId);
         };
     }
 

@@ -78,13 +78,13 @@ public class VideoStorage {
     /**
      * Finds subtitles by YouTube video ID.
      *
-     * @param videoId the YouTube video ID
+     * @param youtubeVideoId the YouTube video ID
      * @return a list of subtitle entries
      */
-    public List<SubtitleEntry> findSubtitlesByVideoId(String videoId) {
+    public List<SubtitleEntry> findSubtitlesByVideoId(String youtubeVideoId) {
         // TODO: These stream transformations make the search two times slower.
         //  I can optimise it by making it part of the indexing.
-        return videoRepository.findByVideoId(videoId).stream()
+        return videoRepository.findByYoutubeVideoId(youtubeVideoId).stream()
                 .map(Video::getSrt)
                 .map(SrtSubtitles::new)
                 .flatMap(SrtSubtitles::stream)

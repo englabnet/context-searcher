@@ -41,7 +41,7 @@ public class VideoController {
     @GetMapping
     public Page<Video> getVideos(Long id, String videoId, EnglishVariety variety, Pageable pageable) {
         Specification<Video> specification = byId(id)
-                .and(byVideoId(videoId))
+                .and(byYoutubeVideoId(videoId))
                 .and(byVariety(variety));
         return videoStorage.findAll(specification, pageable);
     }

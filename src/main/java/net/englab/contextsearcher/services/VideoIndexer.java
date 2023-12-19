@@ -60,20 +60,20 @@ public class VideoIndexer {
     /**
      * Adds a new video.
      *
-     * @param videoId   the YouTube video ID
-     * @param variety   the variety of English used in the video
-     * @param srt       the subtitles for the video in SRT format
+     * @param youtubeVideoId    the YouTube video ID
+     * @param variety           the variety of English used in the video
+     * @param srt               the subtitles for the video in SRT format
      * @throws IndexingConflictException if an indexing job is running
      * @throws VideoAlreadyExistsException if the video already exists
      */
-    public void add(String videoId, EnglishVariety variety, String srt) {
+    public void add(String youtubeVideoId, EnglishVariety variety, String srt) {
         if (isRunning.get()) {
             throw new IndexingConflictException("A video cannot be indexed while an indexing job is running");
         }
-        videoStorage.findAny(byVideoId(videoId)).ifPresent(video -> {
+        videoStorage.findAny(byYoutubeVideoId(youtubeVideoId)).ifPresent(video -> {
             throw new VideoAlreadyExistsException("The video already exists.");
         });
-        Video video = new Video(null, videoId, variety, srt);
+        Video video = new Video(null, youtubeVideoId, variety, srt);
         Long id = videoStorage.save(video);
         log.info("A new video with ID={} has been added", id);
         try {
@@ -87,23 +87,23 @@ public class VideoIndexer {
     /**
      * Updates the specified video.
      *
-     * @param id        the ID of the video we are updating
-     * @param videoId   the updated YouTube video ID
-     * @param variety   the updated variety of English used in the video
-     * @param srt       the updated subtitles for the video in SRT format
+     * @param id                the ID of the video we are updating
+     * @param youtubeVideoId    the updated YouTube video ID
+     * @param variety           the updated variety of English used in the video
+     * @param srt               the updated subtitles for the video in SRT format
      * @throws IndexingConflictException if an indexing job is running
      * @throws VideoNotFoundException if the video is not found
      */
-    public void update(Long id, String videoId, EnglishVariety variety, String srt) {
+    public void update(Long id, String youtubeVideoId, EnglishVariety variety, String srt) {
         if (isRunning.get()) {
             throw new IndexingConflictException("A video cannot be updated while an indexing job is running");
         }
         videoStorage.findAny(byId(id)).ifPresentOrElse(video -> {
-            video.setVideoId(videoId);
+            video.setYoutubeVideoId(youtubeVideoId);
             video.setVariety(variety);
             video.setSrt(srt);
             videoStorage.save(video);
-            documentManager.deleteByFieldValue(VIDEO_INDEX_NAME, YOUTUBE_VIDEO_ID, video.getVideoId());
+            documentManager.deleteByFieldValue(VIDEO_INDEX_NAME, YOUTUBE_VIDEO_ID, video.getYoutubeVideoId());
             try {
                 indexVideos(VIDEO_INDEX_NAME, List.of(video));
             } catch (Exception e) {
@@ -128,7 +128,7 @@ public class VideoIndexer {
         }
         try {
             videoStorage.findAny(byId(id)).ifPresentOrElse(video ->
-                    documentManager.deleteByFieldValue(VIDEO_INDEX_NAME, YOUTUBE_VIDEO_ID, video.getVideoId()),
+                    documentManager.deleteByFieldValue(VIDEO_INDEX_NAME, YOUTUBE_VIDEO_ID, video.getYoutubeVideoId()),
             () -> {
                 throw new VideoNotFoundException("The video has not been found and cannot be removed.");
             });
@@ -234,7 +234,7 @@ public class VideoIndexer {
             for (SubtitleSentence sentence : sentences) {
                 String transformedText = TextTransformations.removeSoundDescriptions(sentence.text());
                 VideoFragmentDocument doc = new VideoFragmentDocument(
-                        video.getVideoId(),
+                        video.getYoutubeVideoId(),
                         video.getVariety(),
                         transformedText,
                         sentence.position(),
