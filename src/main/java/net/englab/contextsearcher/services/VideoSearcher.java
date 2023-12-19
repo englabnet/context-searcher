@@ -33,7 +33,7 @@ import static net.englab.contextsearcher.elastic.VideoIndexProperties.*;
 public class VideoSearcher {
 
     private final ElasticsearchClient elasticsearchClient;
-    private final VideoStorage videoStorage;
+    private final IndexedVideoStorage indexedVideoStorage;
 
     /**
      * Finds video documents in the video index containing the given phrase.
@@ -105,9 +105,10 @@ public class VideoSearcher {
             );
         }
 
-        List<SubtitleEntry> subtitles = videoStorage.findSubtitlesByVideoId(doc.getYoutubeVideoId());
+        List<SubtitleEntry> subtitles = indexedVideoStorage.findSubtitlesByVideoId(hit.index(), doc.getYoutubeVideoId());
 
         // here, we find all the subtitle entries that should contain our highlighted phrase
+        // this small trick will boost performance since we don't need to go through all the subtitles
         List<SubtitleEntry> relevantSubtitleEntries = subtitles.subList(firstEntryIndex, lastEntryIndex + 1);
 
         // elastic wraps highlighted text in <em> and </em> tags

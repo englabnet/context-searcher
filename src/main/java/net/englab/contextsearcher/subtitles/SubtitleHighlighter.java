@@ -27,8 +27,7 @@ public class SubtitleHighlighter {
         int partIndex = 0;
         int endPosition = sentencePosition + highlightedParts[0].length();
 
-        for (int entryIndex = 0; entryIndex < subtitleEntries.size(); entryIndex++) {
-            SubtitleEntry currentEntry = subtitleEntries.get(entryIndex);
+        for (SubtitleEntry currentEntry : subtitleEntries) {
             String entryText = currentEntry.getText().get(0);
 
             // there's no need to process entries with no text
