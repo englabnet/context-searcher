@@ -35,7 +35,7 @@ class SubtitleSentenceExtractorTest {
                 that’s what you’re talking about.
                 """;
 
-        List<SubtitleSentence> sentences = sentenceExtractor.extract(text);
+        List<SubtitleSentence> sentences = sentenceExtractor.extract(new SrtSubtitles(text));
 
         assertEquals(1, sentences.size());
         SubtitleSentence sentence = sentences.get(0);
@@ -68,7 +68,7 @@ class SubtitleSentenceExtractorTest {
                 that will catch bugs!
                 """;
 
-        List<SubtitleSentence> sentences = sentenceExtractor.extract(text);
+        List<SubtitleSentence> sentences = sentenceExtractor.extract(new SrtSubtitles(text));
 
         assertEquals(4, sentences.size());
 
@@ -122,7 +122,7 @@ class SubtitleSentenceExtractorTest {
                 Matcha tea is "powdered tea tea".
                 """;
 
-        List<SubtitleSentence> sentences = sentenceExtractor.extract(text);
+        List<SubtitleSentence> sentences = sentenceExtractor.extract(new SrtSubtitles(text));
 
         assertEquals(4, sentences.size());
 
@@ -185,7 +185,7 @@ class SubtitleSentenceExtractorTest {
                 I was unsure whether it was really for me.
                 """;
 
-        List<SubtitleSentence> sentences = sentenceExtractor.extract(text);
+        List<SubtitleSentence> sentences = sentenceExtractor.extract(new SrtSubtitles(text));
 
         assertEquals(5, sentences.size());
 
@@ -245,7 +245,7 @@ class SubtitleSentenceExtractorTest {
                 "...it won't be with me."
                 """;
 
-        List<SubtitleSentence> sentences = sentenceExtractor.extract(text);
+        List<SubtitleSentence> sentences = sentenceExtractor.extract(new SrtSubtitles(text));
 
         assertEquals(1, sentences.size());
         SubtitleSentence sentence = sentences.get(0);

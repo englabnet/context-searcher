@@ -12,11 +12,14 @@ import net.englab.contextsearcher.exceptions.VideoAlreadyExistsException;
 import net.englab.contextsearcher.exceptions.VideoNotFoundException;
 import net.englab.contextsearcher.models.common.EnglishVariety;
 import net.englab.contextsearcher.models.elastic.VideoIndexMetadata;
+import net.englab.contextsearcher.models.entities.IndexedVideo;
 import net.englab.contextsearcher.models.indexing.IndexingInfo;
+import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
 import net.englab.contextsearcher.models.subtitles.SubtitleSentence;
 import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.services.elastic.ElasticDocumentManager;
 import net.englab.contextsearcher.services.elastic.ElasticIndexManager;
+import net.englab.contextsearcher.subtitles.SrtSubtitles;
 import net.englab.contextsearcher.subtitles.SubtitleSentenceExtractor;
 import net.englab.contextsearcher.text.TextTransformations;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -48,6 +51,7 @@ public class VideoIndexer {
     );
 
     private final VideoStorage videoStorage;
+    private final IndexedVideoStorage indexedVideoStorage;
 
     private final ElasticIndexManager indexManager;
     private final ElasticDocumentManager documentManager;
@@ -127,9 +131,13 @@ public class VideoIndexer {
             throw new IndexingConflictException("A video cannot be removed while an indexing job is running");
         }
         try {
-            videoStorage.findAny(byId(id)).ifPresentOrElse(video ->
-                    documentManager.deleteByFieldValue(VIDEO_INDEX_NAME, YOUTUBE_VIDEO_ID, video.getYoutubeVideoId()),
-            () -> {
+            videoStorage.findAny(byId(id)).ifPresentOrElse(video -> {
+                String youtubeVideoId = video.getYoutubeVideoId();
+                documentManager.deleteByFieldValue(VIDEO_INDEX_NAME, YOUTUBE_VIDEO_ID, youtubeVideoId);
+                indexManager.getIndexName(VIDEO_INDEX_NAME).ifPresent(indexName ->
+                        indexedVideoStorage.delete(indexName, youtubeVideoId)
+                );
+            }, () -> {
                 throw new VideoNotFoundException("The video has not been found and cannot be removed.");
             });
         } catch (Exception e) {
@@ -204,6 +212,9 @@ public class VideoIndexer {
 
         oldIndexName.ifPresent(indexManager::delete);
         log.info("The old index has been removed.");
+
+        indexedVideoStorage.cleanUp(indexName);
+        log.info("Removed stale indexed videos from the database.");
     }
 
     @SneakyThrows
@@ -230,7 +241,18 @@ public class VideoIndexer {
         List<VideoFragmentDocument> docs = new ArrayList<>();
         List<Future<BulkResponse>> futures = new ArrayList<>();
         for (Video video : videos) {
-            List<SubtitleSentence> sentences = sentenceExtractor.extract(video.getSrt());
+            SrtSubtitles srtSubtitles = new SrtSubtitles(video.getSrt());
+
+            List<SubtitleEntry> subtitleEntries = srtSubtitles.stream()
+                    .map(b -> new SubtitleEntry(
+                            b.timeFrame().startTime(),
+                            b.timeFrame().endTime(),
+                            List.of(String.join(" ", b.text())))
+                    ).toList();
+            IndexedVideo indexedVideo = new IndexedVideo(null, index, video.getYoutubeVideoId(), video.getVariety(), subtitleEntries);
+            indexedVideoStorage.save(indexedVideo);
+
+            List<SubtitleSentence> sentences = sentenceExtractor.extract(srtSubtitles);
             for (SubtitleSentence sentence : sentences) {
                 String transformedText = TextTransformations.removeSoundDescriptions(sentence.text());
                 VideoFragmentDocument doc = new VideoFragmentDocument(

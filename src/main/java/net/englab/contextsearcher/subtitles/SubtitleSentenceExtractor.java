@@ -21,12 +21,10 @@ public class SubtitleSentenceExtractor {
     /**
      * Extracts sentences from the given SRT subtitles.
      *
-     * @param srt the subtitles in the SRT format
+     * @param srtSubtitles the subtitles in the SRT format
      * @return a collection of subtitle sentences
      */
-    public List<SubtitleSentence> extract(String srt) {
-        SrtSubtitles srtSubtitles = new SrtSubtitles(srt);
-
+    public List<SubtitleSentence> extract(SrtSubtitles srtSubtitles) {
         StringBuilder stringBuilder = new StringBuilder();
 
         // character position -> SRT entry index

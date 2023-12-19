@@ -12,15 +12,15 @@ import lombok.extern.slf4j.Slf4j;
 import net.englab.contextsearcher.exceptions.ElasticOperationException;
 import net.englab.contextsearcher.models.elastic.VideoFragmentDocument;
 import net.englab.contextsearcher.models.common.EnglishVariety;
-import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
 import net.englab.contextsearcher.models.search.VideoFragmentPage;
 import net.englab.contextsearcher.models.search.VideoFragment;
+import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
 import net.englab.contextsearcher.subtitles.SubtitleHighlighter;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static net.englab.contextsearcher.elastic.VideoIndexProperties.*;
 
@@ -33,7 +33,7 @@ import static net.englab.contextsearcher.elastic.VideoIndexProperties.*;
 public class VideoSearcher {
 
     private final ElasticsearchClient elasticsearchClient;
-    private final VideoStorage videoStorage;
+    private final IndexedVideoStorage indexedVideoStorage;
 
     /**
      * Finds video documents in the video index containing the given phrase.
@@ -46,9 +46,23 @@ public class VideoSearcher {
      */
     public VideoFragmentPage search(String phrase, EnglishVariety variety, int from, int size) {
         var searchResponse = searchDocuments(phrase, variety, from, size);
+        var hits = searchResponse.hits().hits();
 
-        List<VideoFragment> videos = searchResponse.hits().hits().stream()
-                .map(this::buildVideoFragment)
+        Set<String> youtubeVideoIds = hits.stream()
+                .map(Hit::source)
+                .filter(Objects::nonNull)
+                .map(VideoFragmentDocument::getYoutubeVideoId)
+                .collect(Collectors.toSet());
+
+        String indexName = hits.stream()
+                .findAny()
+                .map(Hit::index)
+                .orElse("");
+
+        Map<String, List<SubtitleEntry>> subtitleMap = indexedVideoStorage.findSubtitles(indexName, youtubeVideoIds);
+
+        List<VideoFragment> videos = hits.stream()
+                .map(hit -> buildVideoFragment(hit, subtitleMap))
                 .toList();
 
         long totalElements = Optional.of(searchResponse.hits())
@@ -88,7 +102,7 @@ public class VideoSearcher {
     /**
      * Builds a VideoFragment based on the Elasticsearch response.
      */
-    private VideoFragment buildVideoFragment(Hit<VideoFragmentDocument> hit) {
+    private VideoFragment buildVideoFragment(Hit<VideoFragmentDocument> hit, Map<String, List<SubtitleEntry>> subtitleMap) {
         VideoFragmentDocument doc = hit.source();
         if (doc == null) {
             throw new IllegalStateException("Video fragment cannot be null");
@@ -105,9 +119,10 @@ public class VideoSearcher {
             );
         }
 
-        List<SubtitleEntry> subtitles = videoStorage.findSubtitlesByVideoId(doc.getYoutubeVideoId());
+        List<SubtitleEntry> subtitles = subtitleMap.get(doc.getYoutubeVideoId());
 
         // here, we find all the subtitle entries that should contain our highlighted phrase
+        // this small trick will boost performance since we don't need to go through all the subtitles
         List<SubtitleEntry> relevantSubtitleEntries = subtitles.subList(firstEntryIndex, lastEntryIndex + 1);
 
         // elastic wraps highlighted text in <em> and </em> tags

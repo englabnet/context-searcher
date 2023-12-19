@@ -2,10 +2,8 @@ package net.englab.contextsearcher.services;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
 import net.englab.contextsearcher.models.entities.Video;
 import net.englab.contextsearcher.repositories.VideoRepository;
-import net.englab.contextsearcher.subtitles.SrtSubtitles;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,7 +23,7 @@ public class VideoStorage {
     private final VideoRepository videoRepository;
 
     /**
-     * Saves a new video to the database.
+     * Saves a new video to the storage.
      *
      * @param video the video that needs to be saved
      * @return the unique ID assigned to the saved video
@@ -73,25 +71,5 @@ public class VideoStorage {
      */
     public Page<Video> findAll(Specification<Video> specification, Pageable pageable) {
         return videoRepository.findAll(specification, pageable);
-    }
-
-    /**
-     * Finds subtitles by YouTube video ID.
-     *
-     * @param youtubeVideoId the YouTube video ID
-     * @return a list of subtitle entries
-     */
-    public List<SubtitleEntry> findSubtitlesByVideoId(String youtubeVideoId) {
-        // TODO: These stream transformations make the search two times slower.
-        //  I can optimise it by making it part of the indexing.
-        return videoRepository.findByYoutubeVideoId(youtubeVideoId).stream()
-                .map(Video::getSrt)
-                .map(SrtSubtitles::new)
-                .flatMap(SrtSubtitles::stream)
-                .map(b -> new SubtitleEntry(
-                        b.timeFrame().startTime(),
-                        b.timeFrame().endTime(),
-                        List.of(String.join(" ", b.text())))
-                ).toList();
     }
 }
