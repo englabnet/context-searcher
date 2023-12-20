@@ -21,14 +21,18 @@ public class SubtitleHighlighter {
      * @param sentencePosition  the position where the sentence starts in the original subtitle entry
      * @param subtitleEntries   a part of subtitle entries where the text needs to be highlighted.
      *                          This parameter will be updated by the method.
+     * @return a copy of the subtitle entries with the text highlighted
      * @throws HighlightingException if an unexpected error occurs during highlighting
      */
-    public static void highlight(String[] highlightedParts, int sentencePosition, List<SubtitleEntry> subtitleEntries) {
+    public static List<SubtitleEntry> highlight(String[] highlightedParts, int sentencePosition, List<SubtitleEntry> subtitleEntries) {
+        List<SubtitleEntry> result = new ArrayList<>(subtitleEntries);
+
         int partIndex = 0;
         int endPosition = sentencePosition + highlightedParts[0].length();
 
-        for (SubtitleEntry currentEntry : subtitleEntries) {
-            String entryText = currentEntry.getText().get(0);
+        for (int i = 0; i < subtitleEntries.size(); i++) {
+            SubtitleEntry currentEntry = subtitleEntries.get(i);
+            String entryText = currentEntry.text().get(0);
 
             // there's no need to process entries with no text
             if (entryText.isEmpty()) {
@@ -60,7 +64,9 @@ public class SubtitleHighlighter {
 
             endPosition -= entryText.length() + 1;
 
-            currentEntry.setText(highlightedEntryText);
+            result.set(i, new SubtitleEntry(currentEntry.startTime(), currentEntry.endTime(), highlightedEntryText));
         }
+
+        return result;
     }
 }

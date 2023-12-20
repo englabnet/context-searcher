@@ -123,7 +123,7 @@ public class VideoSearcher {
 
         // here, we find all the subtitle entries that should contain our highlighted phrase
         // this small trick will boost performance since we don't need to go through all the subtitles
-        List<SubtitleEntry> relevantSubtitleEntries = subtitles.subList(firstEntryIndex, lastEntryIndex + 1);
+        List<SubtitleEntry> entriesToHighlight = subtitles.subList(firstEntryIndex, lastEntryIndex + 1);
 
         // elastic wraps highlighted text in <em> and </em> tags
         String highlight = hit.highlight().get(SENTENCE).get(0);
@@ -131,7 +131,12 @@ public class VideoSearcher {
 
         int sentencePosition = doc.getSentencePosition();
 
-        SubtitleHighlighter.highlight(textParts, sentencePosition, relevantSubtitleEntries);
+        List<SubtitleEntry> highlightedEntries = SubtitleHighlighter.highlight(textParts, sentencePosition, entriesToHighlight);
+
+        List<SubtitleEntry> preparedSubtitles = new ArrayList<>();
+        preparedSubtitles.addAll(subtitles.subList(0, firstEntryIndex));
+        preparedSubtitles.addAll(highlightedEntries);
+        preparedSubtitles.addAll(subtitles.subList(lastEntryIndex + 1, subtitles.size()));
 
         int firstHighlightPosition = textParts[0].length();
         Integer subtitleEntryIndex = sentenceRangeMap.get(firstHighlightPosition);
@@ -140,6 +145,6 @@ public class VideoSearcher {
             throw new IllegalStateException("Failed to find the subtitle entry index. Sentence range map is not correct.");
         }
 
-        return new VideoFragment(doc.getYoutubeVideoId(), subtitleEntryIndex, subtitles);
+        return new VideoFragment(doc.getYoutubeVideoId(), subtitleEntryIndex, preparedSubtitles);
     }
 }
