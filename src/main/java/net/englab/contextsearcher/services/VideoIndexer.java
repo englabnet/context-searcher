@@ -98,7 +98,7 @@ public class VideoIndexer {
      * @param variety           the updated variety of English used in the video
      * @param srt               the updated subtitles for the video in SRT format
      * @throws IndexingConflictException if an indexing job is running
-     * @throws VideoNotFoundException if the video is not found
+     * @throws VideoNotFoundException if the video has not been found
      */
     public void update(Long id, String youtubeVideoId, EnglishVariety variety, String srt) {
         if (isRunning.get()) {
@@ -126,7 +126,7 @@ public class VideoIndexer {
      *
      * @param id the ID of the video we want to remove
      * @throws IndexingConflictException if an indexing job is running
-     * @throws VideoNotFoundException if the video is not found
+     * @throws VideoNotFoundException if the video has not been found
      */
     public void remove(Long id) {
         if (isRunning.get()) {
