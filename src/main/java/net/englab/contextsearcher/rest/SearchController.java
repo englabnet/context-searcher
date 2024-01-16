@@ -36,7 +36,7 @@ public class SearchController {
             EnglishVariety variety,
             @RequestParam(defaultValue = "0") int from, // TODO: change it to a page
             @RequestParam(defaultValue = "10") int size) {
-        if (size >= 50) {
+        if (size > 50) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The size cannot be more than 50");
         }
         return videoSearcher.search(phrase, variety, from, size);
