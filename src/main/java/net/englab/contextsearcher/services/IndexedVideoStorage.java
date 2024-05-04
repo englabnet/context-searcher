@@ -1,11 +1,11 @@
 package net.englab.contextsearcher.services;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.englab.contextsearcher.models.entities.IndexedVideo;
 import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
 import net.englab.contextsearcher.repositories.IndexedVideoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +27,7 @@ public class IndexedVideoStorage {
      *
      * @param indexedVideo the video that needs to be saved
      */
+    @Transactional
     public void save(IndexedVideo indexedVideo) {
         indexedVideoRepository.save(indexedVideo);
     }
@@ -50,6 +51,7 @@ public class IndexedVideoStorage {
      * @return  a map where the key is a YouTube video ID
      *          and the value is a list of corresponding subtitles
      */
+    @Transactional(readOnly = true)
     public Map<String, List<SubtitleEntry>> findSubtitles(String indexName, Set<String> youtubeVideoIds) {
         return indexedVideoRepository.findByIndexNameAndYoutubeVideoIdIn(indexName, youtubeVideoIds).stream()
                 .collect(Collectors.toMap(IndexedVideo::getYoutubeVideoId, IndexedVideo::getSubtitles));
