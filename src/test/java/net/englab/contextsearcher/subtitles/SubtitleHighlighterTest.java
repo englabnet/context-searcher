@@ -1,6 +1,6 @@
 package net.englab.contextsearcher.subtitles;
 
-import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
+import net.englab.common.search.models.subtitles.SubtitleEntry;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

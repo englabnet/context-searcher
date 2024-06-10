@@ -2,8 +2,8 @@ package net.englab.contextsearcher.subtitles;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import net.englab.common.search.models.subtitles.SubtitleEntry;
 import net.englab.contextsearcher.exceptions.HighlightingException;
-import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
 
 import java.util.ArrayList;
 import java.util.List;

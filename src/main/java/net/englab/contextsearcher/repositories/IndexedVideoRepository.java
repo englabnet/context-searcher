@@ -22,19 +22,4 @@ public interface IndexedVideoRepository extends JpaRepository<IndexedVideo, Long
      *          If no video is found, it will be empty.
      */
     List<IndexedVideo> findByIndexNameAndYoutubeVideoIdIn(String indexName, Set<String> youtubeVideoIds);
-
-    /**
-     * Deletes a video by its YouTube video ID.
-     *
-     * @param indexName         the name of the index
-     * @param youtubeVideoId    the YouTube video ID
-     */
-    void deleteByIndexNameAndYoutubeVideoId(String indexName, String youtubeVideoId);
-
-    /**
-     * Deletes all videos that do not belong to the specified index.
-     *
-     * @param indexName the name of the index
-     */
-    void deleteAllByIndexNameIsNot(String indexName);
 }

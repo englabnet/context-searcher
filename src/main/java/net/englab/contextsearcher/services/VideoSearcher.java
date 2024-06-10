@@ -9,12 +9,12 @@ import co.elastic.clients.elasticsearch.core.search.TotalHits;
 import com.google.common.collect.RangeMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.englab.contextsearcher.exceptions.ElasticOperationException;
-import net.englab.contextsearcher.models.elastic.VideoFragmentDocument;
-import net.englab.contextsearcher.models.common.EnglishVariety;
+import net.englab.common.search.exceptions.ElasticOperationException;
+import net.englab.common.search.models.common.EnglishVariety;
+import net.englab.common.search.models.elastic.VideoFragmentDocument;
+import net.englab.common.search.models.search.VideoFragment;
+import net.englab.common.search.models.subtitles.SubtitleEntry;
 import net.englab.contextsearcher.models.search.VideoFragmentPage;
-import net.englab.contextsearcher.models.search.VideoFragment;
-import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
 import net.englab.contextsearcher.subtitles.SubtitleHighlighter;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static net.englab.contextsearcher.elastic.VideoIndexProperties.*;
+import static net.englab.common.search.models.elastic.VideoIndexProperties.*;
 
 /**
  * A service that handles video searching.
@@ -93,7 +93,7 @@ public class VideoSearcher {
     private static BoolQuery buildSearchQuery(String phrase, EnglishVariety variety) {
         BoolQuery.Builder builder = new BoolQuery.Builder()
                 .must(m -> m.matchPhrase(p -> p.field(SENTENCE).query(phrase)));
-        if (variety != EnglishVariety.ALL) {
+        if (variety != null) {
             builder.filter(f -> f.term(t -> t.field(ENGLISH_VARIETY).value(variety.name())));
         }
         return builder.build();

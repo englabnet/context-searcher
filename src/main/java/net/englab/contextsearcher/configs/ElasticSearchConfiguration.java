@@ -5,7 +5,7 @@ import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import net.englab.contextsearcher.json.CustomModule;
+import net.englab.common.search.json.SearchCommonModule;
 import org.elasticsearch.client.RestClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +16,7 @@ public class ElasticSearchConfiguration {
     public ElasticsearchClient elasticsearchClient(RestClient restClient) {
         ObjectMapper objectMapper = JsonMapper.builder()
                 .findAndAddModules()
-                .addModule(new CustomModule())
+                .addModule(new SearchCommonModule())
                 .build();
 
         var transport = new RestClientTransport(restClient, new JacksonJsonpMapper(objectMapper));

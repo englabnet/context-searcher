@@ -1,7 +1,7 @@
 package net.englab.contextsearcher.rest;
 
 import lombok.RequiredArgsConstructor;
-import net.englab.contextsearcher.models.common.EnglishVariety;
+import net.englab.common.search.models.common.EnglishVariety;
 import net.englab.contextsearcher.models.search.VideoFragmentPage;
 import net.englab.contextsearcher.services.VideoSearcher;
 import org.springframework.http.HttpStatus;
@@ -33,8 +33,8 @@ public class SearchController {
     @GetMapping
     public VideoFragmentPage search(
             String phrase,
-            EnglishVariety variety,
-            @RequestParam(defaultValue = "0") int from, // TODO: change it to a page
+            @RequestParam(required = false) EnglishVariety variety,
+            @RequestParam(defaultValue = "0") int from,
             @RequestParam(defaultValue = "10") int size) {
         if (size > 50) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The size cannot be more than 50");

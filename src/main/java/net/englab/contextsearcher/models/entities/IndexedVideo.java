@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import net.englab.contextsearcher.models.common.EnglishVariety;
-import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
+import net.englab.common.search.models.common.EnglishVariety;
+import net.englab.common.search.models.subtitles.SubtitleEntry;
 import org.hibernate.annotations.Immutable;
 
 import java.util.List;

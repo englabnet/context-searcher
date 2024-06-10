@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import lombok.SneakyThrows;
-import net.englab.contextsearcher.models.subtitles.SubtitleEntry;
+import net.englab.common.search.models.subtitles.SubtitleEntry;
 
 import java.util.List;
 
