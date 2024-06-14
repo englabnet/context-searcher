@@ -12,8 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.englab.common.search.exceptions.ElasticOperationException;
 import net.englab.common.search.models.common.EnglishVariety;
 import net.englab.common.search.models.elastic.VideoFragmentDocument;
-import net.englab.common.search.models.search.VideoFragment;
 import net.englab.common.search.models.subtitles.SubtitleEntry;
+import net.englab.contextsearcher.models.search.VideoFragment;
 import net.englab.contextsearcher.models.search.VideoFragmentPage;
 import net.englab.contextsearcher.subtitles.SubtitleHighlighter;
 import org.springframework.stereotype.Service;
@@ -145,6 +145,6 @@ public class VideoSearcher {
             throw new IllegalStateException("Failed to find the subtitle entry index. Sentence range map is not correct.");
         }
 
-        return new VideoFragment(doc.getYoutubeVideoId(), subtitleEntryIndex, preparedSubtitles);
+        return new VideoFragment(doc.getYoutubeVideoId(), doc.getVariety(), subtitleEntryIndex, preparedSubtitles);
     }
 }

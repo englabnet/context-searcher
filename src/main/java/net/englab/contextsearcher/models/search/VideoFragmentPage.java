@@ -1,7 +1,5 @@
 package net.englab.contextsearcher.models.search;
 
-import net.englab.common.search.models.search.VideoFragment;
-
 import java.util.List;
 
 /**
